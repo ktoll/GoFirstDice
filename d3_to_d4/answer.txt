@@ -1,0 +1,10 @@
+abcddcbadbaccabdcbdaadbccbdaadbcdbaccabdabcddcba
+abcddcbadbcaacbdcbaddacbbcdaadbcdbaccabdabdccdba
+
+#abccbacbaabcbaccabbcaacbcbaabcabccba
+
+contrived wrong:
+abcddcbadcbaadbccbdaabcdbcadadbccbdadacbdacbbcad
+
+contrived 2:
+abcddcbacbaddabcdbcaacdbbdcaacbdcbaddabcabcddcba
