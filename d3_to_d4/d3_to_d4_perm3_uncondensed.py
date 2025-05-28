@@ -68,77 +68,59 @@ def get_d3_list(d3_path):
    return d3_list
 
 
-def make_graph(d3_list):
-   d2_qty = 0
-   d2_values = []
-   d2_labels = {}
-   d3_qty = 0
-   d3s = []
-   d3_labels = {}
-   for i in range(len(d3_list)):
-      #print(d3_list[i])
-      ab1, ab2, ac1, ac2, bc1, bc2 = get_d2_labels(d3_list[i])
-      #print(ab1)
-      #print(ab2)
-      #print(ac1)
-      #print(ac2)
-      #print(bc1)
-      #print(bc2)
-      if ab1 not in d2_labels:
-         d2_values.append(set())
-         d2_labels[ab1] = d2_qty
-         d2_qty += 1
-      if ac1 not in d2_labels:
-         d2_values.append(set())
-         d2_labels[ac1] = d2_qty
-         d2_qty += 1
-      if bc1 not in d2_labels:
-         d2_values.append(set())
-         d2_labels[bc1] = d2_qty
-         d2_qty += 1
-      if ab2 not in d2_labels:
-         d2_values.append(set())
-         d2_labels[ab2] = d2_qty
-         d2_qty += 1
-      if ac2 not in d2_labels:
-         d2_values.append(set())
-         d2_labels[ac2] = d2_qty
-         d2_qty += 1
-      if bc2 not in d2_labels:
-         d2_values.append(set())
-         d2_labels[bc2] = d2_qty
-         d2_qty += 1
-      if d3_list[i] not in d3_labels:
-         d3s.append((d2_labels[ab1], d2_labels[ac1], d2_labels[bc1], d3_list[i]))
-         d3_labels[d3_list[i]] = d3_qty
-         d3_qty += 1
-      rev = get_d3_reverse(d3_list[i])
-      if rev not in d3_labels:
-         d3s.append((d2_labels[ab2], d2_labels[ac2], d2_labels[bc2], rev))
-         d3_labels[rev] = d3_qty
-         d3_qty += 1
-      #print(d3_list[i] == rev)
-      #put d3 links in d2s
-      d2_values[d2_labels[ab1]].add(d3_labels[d3_list[i]])
-      d2_values[d2_labels[ac1]].add(d3_labels[d3_list[i]])
-      d2_values[d2_labels[bc1]].add(d3_labels[d3_list[i]])
-      d2_values[d2_labels[ab2]].add(d3_labels[rev])
-      d2_values[d2_labels[ac2]].add(d3_labels[rev])
-      d2_values[d2_labels[bc2]].add(d3_labels[rev])
-      #put d2 links in d3
-      #d3s.append((d2_labels[ab1], d2_labels[ac1], d2_labels[bc1], d3_list[i]))
-      #d3s.append((d2_labels[ab2], d2_labels[ac2], d2_labels[bc2], get_d3_reverse(d3_list[i])))
-   #   print(d2_values)
-   #   print(d2_labels)
-   #   print(d3s)
-   #print(d2_labels)
+def make_graph(d3_path):
+   with open(d3_path, 'r') as d3_file:
+      d2_qty = 0
+      d2_values = []
+      d2_labels = {}
+      d3_qty = 0
+      d3s = []
+      d3_labels = {}
+      for d3_with_nl in d3_file:
+         d3 = d3_with_nl.strip()
+         #print(d3_list[i])
+         ab1, ac1, bc1 = get_d2_labels(d3)
+         #print(ab1)
+         #print(ab2)
+         #print(ac1)
+         #print(ac2)
+         #print(bc1)
+         #print(bc2)
+         if ab1 not in d2_labels:
+            d2_values.append(set())
+            d2_labels[ab1] = d2_qty
+            d2_qty += 1
+         if ac1 not in d2_labels:
+            d2_values.append(set())
+            d2_labels[ac1] = d2_qty
+            d2_qty += 1
+         if bc1 not in d2_labels:
+            d2_values.append(set())
+            d2_labels[bc1] = d2_qty
+            d2_qty += 1
+         if d3 not in d3_labels:
+            d3s.append((d2_labels[ab1], d2_labels[ac1], d2_labels[bc1], d3))
+            d3_labels[d3] = d3_qty
+            d3_qty += 1
+         #print(d3_list[i] == rev)
+         #put d3 links in d2s
+         d2_values[d2_labels[ab1]].add(d3_labels[d3])
+         d2_values[d2_labels[ac1]].add(d3_labels[d3])
+         d2_values[d2_labels[bc1]].add(d3_labels[d3])
+         #put d2 links in d3
+         #d3s.append((d2_labels[ab1], d2_labels[ac1], d2_labels[bc1], d3_list[i]))
+         #d3s.append((d2_labels[ab2], d2_labels[ac2], d2_labels[bc2], get_d3_reverse(d3_list[i])))
+      #   print(d2_values)
+      #   print(d2_labels)
+      #   print(d3s)
+      #print(d2_labels)
 
-   #total_d2s = 0
-   #total_values = 0
-   #for d2 in d2_values:
-   #   total_values += len(d2)
-   #   total_d2s += 1
-   #print(total_values / total_d2s)
+      #total_d2s = 0
+      #total_values = 0
+      #for d2 in d2_values:
+      #   total_values += len(d2)
+      #   total_d2s += 1
+      #print(total_values / total_d2s)
    return d3s, d2_values, d3_labels
 
 def get_d2_labels(d3):
@@ -157,10 +139,7 @@ def get_d2_labels(d3):
          bc1 = bc1 + 'b'
       else:
          print("We've got a problem with the input file")
-   ab2 = get_reverse(ab1)
-   ac2 = get_reverse(ac1)
-   bc2 = get_reverse(bc1)
-   return ab1, ab2, ac1, ac2, bc1, bc2
+   return ab1, ac1, bc1
 
 def get_reverse(ab1):
    ab2 = ''
@@ -347,9 +326,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument("d3_path")
 args = parser.parse_args()
 
-d3_list = get_d3_list(args.d3_path)
+#d3_list = get_d3_list(args.d3_path)
 #print(d3_list)
-d3s, d2s, d3_labels = make_graph(d3_list)
+d3s, d2s, d3_labels = make_graph(args.d3_path)
 #print(d3s)
 #print(d2s)
 d4s = search_graph(d3s, d2s, d3_labels)

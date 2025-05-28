@@ -178,8 +178,8 @@ solutions = d4_path_finder(d4_perm3_list, n)
 share = pow(n, 4) / math.factorial(4)
 print(len(solutions))
 i = 0
-for solution in condenser(solutions):
-#for solution in solutions:
+#for solution in condenser(solutions):
+for solution in solutions:
    if not checker(solution, 4, share):
       print('oh no!')
    print(solution)

@@ -107,6 +107,9 @@ def d3_path_finder(n):
 
 def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_share, cba_share, abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=0, so_far=''):
    solutions = []
+   orders = []
+   for i in range(n):
+      orders.append(0)
    for abc_possibility in abc_path_columns[n - depth - 1][abc_share]:
       if depth == 0 and abc_possibility[0] != 'abc':
          continue
@@ -120,23 +123,37 @@ def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_
                            if abc_possibility[0] == cab_possibility[0]:
                               for cba_possibility in cba_path_columns[n - depth - 1][cba_share]:
                                  if abc_possibility[0] == cba_possibility[0]:
+                                    orders[depth] += 1
                                     if depth == n - 1:
                                        solutions.append(so_far + abc_possibility[0])
                                     else:
-                                       solutions.extend(d3_path_finder_recursive(n, abc_possibility[1], acb_possibility[1], bac_possibility[1], bca_possibility[1], cab_possibility[1], cba_possibility[1], abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=depth+1, so_far=so_far + abc_possibility[0]))
-   return solutions
+                                       solution, order = d3_path_finder_recursive(n, abc_possibility[1], acb_possibility[1], bac_possibility[1], bca_possibility[1], cab_possibility[1], cba_possibility[1], abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=depth+1, so_far=so_far + abc_possibility[0])
+                                       solutions.extend(solution)
+                                       for i in range(n):
+                                          orders[i] += order[i]
+                                       #solutions.extend(d3_path_finder_recursive(n, abc_possibility[1], acb_possibility[1], bac_possibility[1], bca_possibility[1], cab_possibility[1], cba_possibility[1], abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=depth+1, so_far=so_far + abc_possibility[0]))
+   return solutions, orders
+
+
+def order_of_magnitude_finder(abc_path_columns, shares, n, depth=0):
+   if depth < n:
+      options = 0
+      next_shares = []
+      for share in shares:
+         options += len(abc_path_columns[n - depth - 1][share])
+         for option in abc_path_columns[n - depth - 1][share]:
+            if option[1] not in next_shares:
+               next_shares.append(option[1])
+      print(options)
+      order_of_magnitude_finder(abc_path_columns, next_shares, n, depth + 1)
+
 
 #for path_column in d3_path_maker(6, 'a', 'b', 'c'):
 #   print(path_column)
 
-n = 12
-solutions = d3_path_finder(n)
+n = 6
+abc_path_columns = d3_path_maker(n, 'a', 'b', 'c')
 share = pow(n, 3) / math.factorial(3)
-#for solution in condenser(solutions):
-#   if not checker(solution, 3, share):
-#      print('oh no!')
-#   print(solution)
-for solution in solutions:
-   if not checker(solution, 3, share):
-      print('oh no!')
-   print(solution)
+#order_of_magnitude_finder(abc_path_columns, [share], n)
+solutions, order = d3_path_finder(n)
+print(order)
