@@ -76,7 +76,7 @@ def d2_path_finder_recursive(n, ab_share, ba_share, ab_path_columns, ba_path_col
 
 def d3_path_maker(n, a, b, c): #n is for number of sides of dice
    path_columns = []
-   path_columns.append({0:[(a + c + b, 0), (c + a + b, 0), (c + b + a, 0)], n - 1:[(b + a + c, 0), (b + c + a, 0)], n:[(a + b + c, 0)]})
+   path_columns.append({0:[(a + c + b, 0, 1), (c + a + b, 0, 1), (c + b + a, 0, 1)], n - 1:[(b + a + c, 0, 1), (b + c + a, 0, 1)], n:[(a + b + c, 0, 1)]})
    for i in range(n - 1):
       path_columns.append({})
       d3_path_column_maker(a + b + c, (n - i - 1) * (i + 2), path_columns[i], path_columns[i + 1])
@@ -91,7 +91,10 @@ def d3_path_column_maker(group, addition, previous_path_column, current_path_col
    for path_num in previous_path_column:
       if path_num + addition not in current_path_column:
          current_path_column[path_num + addition] = []
-      current_path_column[path_num + addition].append((group, path_num))
+      num_options = 0
+      for option in previous_path_column[path_num]:
+         num_options += option[2]
+      current_path_column[path_num + addition].append((group, path_num, num_options))
 
 
 def d3_path_finder(n):
@@ -106,7 +109,8 @@ def d3_path_finder(n):
    return d3_path_finder_recursive(n, share, share, share, share, share, share, abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns)
 
 def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_share, cba_share, abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=0, so_far=''):
-   solutions = []
+   solution = None
+   options = {}
    for abc_possibility in abc_path_columns[n - depth - 1][abc_share]:
       if depth == 0 and abc_possibility[0] != 'abc':
          continue
@@ -121,22 +125,26 @@ def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_
                               for cba_possibility in cba_path_columns[n - depth - 1][cba_share]:
                                  if abc_possibility[0] == cba_possibility[0]:
                                     if depth == n - 1:
-                                       solutions.append(so_far + abc_possibility[0])
+                                       solution = so_far + abc_possibility[0]
                                     else:
-                                       solutions.extend(d3_path_finder_recursive(n, abc_possibility[1], acb_possibility[1], bac_possibility[1], bca_possibility[1], cab_possibility[1], cba_possibility[1], abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=depth+1, so_far=so_far + abc_possibility[0]))
-   return solutions
+                                       options[(abc_possibility[2] + acb_possibility[2] + bac_possibility[2] + bca_possibility[2] + cab_possibility[2] + cba_possibility[2]) / 6.0] = [abc_possibility[1], acb_possibility[1], bac_possibility[1], bca_possibility[1], cab_possibility[1], cba_possibility[1], so_far + abc_possibility[0]]
+   if solution:
+      return solution
+   sorted_options = sorted(options.keys())
+   for i in range(len(sorted_options) - 1, -1, -1):
+      print(depth)
+      print(sorted_options[i])
+      solution = d3_path_finder_recursive(n, options[sorted_options[i]][0], options[sorted_options[i]][1], options[sorted_options[i]][2], options[sorted_options[i]][3], options[sorted_options[i]][4], options[sorted_options[i]][5], abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=depth+1, so_far=options[sorted_options[i]][6])
+      if solution:
+         return solution
+   return solution
 
 #for path_column in d3_path_maker(6, 'a', 'b', 'c'):
 #   print(path_column)
 
-n = 12
-solutions = d3_path_finder(n)
+n = 30
+solution = d3_path_finder(n)
 share = pow(n, 3) / math.factorial(3)
-#for solution in condenser(solutions):
-#   if not checker(solution, 3, share):
-#      print('oh no!')
-#   print(solution)
-for solution in solutions:
-   if not checker(solution, 3, share):
-      print('oh no!')
-   print(solution)
+if not checker(solution, 3, share):
+   print('oh no!')
+print(solution)
