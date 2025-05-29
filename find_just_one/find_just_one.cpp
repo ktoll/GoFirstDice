@@ -13,9 +13,9 @@ int factorial(int d) {
    return fact;
 }
 
-void path_column_maker_3d(int group, int addition, int *** previous_path_column, int *** current_path_column) {
+void path_column_maker_3d(int group, int old_maximum, int addition, int *** previous_path_column, int *** current_path_column) {
    int num_options;
-   for (int i = 0; i < sizeof(previous_path_column); i++) {
+   for (int i = 0; i < old_maximum + 1; i++) {
       if (previous_path_column[i]) {
          if (not current_path_column[i + addition]) {
             current_path_column[i + addition] = new int * [6];
@@ -64,20 +64,22 @@ void path_maker_3d(int n, int **** paths) {
    paths[0][0][5] = new int [2];
    paths[0][0][5][0] = 0;
    paths[0][0][5][1] = 1;
-   //int maximum = n;
-   //for (int i = 0; i < n - 1; i++) {
-   //   maximum += (i + 2) * (n - i - 1);
-   //   paths[i] = new int ** [maximum];
-   //   for (int j = 0; j < maximum; j++) {
-   //      paths[i][j] = NULL;
-   //   }
-   //   path_column_maker_3d(0, (n - i - 1) * (i + 2), paths[i], paths[i + 1]);
-   //   path_column_maker_3d(1, (n - i - 1) * (i + 1), paths[i], paths[i + 1]);
-   //   path_column_maker_3d(2, (n - i - 2) * (i + 2), paths[i], paths[i + 1]);
-   //   path_column_maker_3d(3, (n - i - 2) * (i + 2), paths[i], paths[i + 1]);
-   //   path_column_maker_3d(4, (n - i - 1) * (i + 1), paths[i], paths[i + 1]);
-   //   path_column_maker_3d(5, (n - i - 2) * (i + 1), paths[i], paths[i + 1]);
-   //}
+   int maximum = n;
+   int old_maximum = 0;
+   for (int i = 0; i < n - 1; i++) {
+      old_maximum = maximum;
+      maximum += (i + 2) * (n - i - 1);
+      paths[i + 1] = new int ** [maximum + 1];
+      for (int j = 0; j < maximum + 1; j++) {
+         paths[i + 1][j] = NULL;
+      }
+      path_column_maker_3d(0, old_maximum, (n - i - 1) * (i + 2), paths[i], paths[i + 1]);
+      path_column_maker_3d(1, old_maximum, (n - i - 1) * (i + 1), paths[i], paths[i + 1]);
+      path_column_maker_3d(2, old_maximum, (n - i - 2) * (i + 2), paths[i], paths[i + 1]);
+      path_column_maker_3d(3, old_maximum, (n - i - 2) * (i + 2), paths[i], paths[i + 1]);
+      path_column_maker_3d(4, old_maximum, (n - i - 1) * (i + 1), paths[i], paths[i + 1]);
+      path_column_maker_3d(5, old_maximum, (n - i - 2) * (i + 1), paths[i], paths[i + 1]);
+   }
 }
 
 void print_path_column(int n, int column, int **** paths) {
@@ -151,6 +153,6 @@ int main() {
       path_maker_3d(n, paths);
       //why(paths);
       print_path_column(n, 0, paths);
-      //print_path_column(n, n - 1, paths);
+      print_path_column(n, n - 1, paths);
    }
 }
