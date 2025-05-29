@@ -15,34 +15,31 @@ def checker(s, l, q):
          good &= count[k] == q
    return good
 
-def equivalence_checker(s1, s2):
+def reverse(s):
    name_map = {}
-   equivalent = True
-   for i in range(len(s1)):
-      if s1[i] in name_map:
-         if s2[len(s2) - i - 1] != name_map[s1[i]]:
-            equivalent = False
-      elif s2[len(s2) - i - 1] not in name_map.values():
-         name_map[s1[i]] = s2[len(s2) - i - 1]
-      else:
-         equivalent = False
-   return equivalent
+   reverse = ""
+   length = len(s)
+   for i in range(length):
+      if s[length - i - 1] not in name_map:
+         name_map[s[length - i - 1]] = s[i]
+      reverse += name_map[s[length - i - 1]]
+   return reverse
 
 def condenser(all_sets):
-   condensed_sets = []
+   set_condenser = {}
    for s in all_sets:
-      already_there = False
-      for c in condensed_sets:
-         if equivalence_checker(s, c):
-            already_there = True
-      if not already_there:
-         condensed_sets.append(s)
-   return condensed_sets
+      if s not in set_condenser:
+         set_condenser[s] = s
+         set_condenser[reverse(s)] = s
+   condensed = []
+   for s in set_condenser.values():
+      if s not in condensed:
+         condensed.append(s)
+   return condensed
 
 
 def d2_path_maker(n, a, b): #n is for number of sides of dice
    path_columns = []
-   #these tuples point to the map value of the previous column, in this case, all 0 because there isn't a previous column.
    path_columns.append({n - 1:[(b + a, 0)], n:[(a + b, 0)]})
    for i in range(n - 1):
       path_columns.append({})
@@ -79,8 +76,7 @@ def d2_path_finder_recursive(n, ab_share, ba_share, ab_path_columns, ba_path_col
 
 def d3_path_maker(n, a, b, c): #n is for number of sides of dice
    path_columns = []
-   #these tuples point to the map value of the previous column, in this case, all 0 because there isn't a previous column.
-   path_columns.append({0:[(a + c + b, 0), (c + a + b, 0), (c + b + a, 0)], n - 1:[(b + a + c, 0), (b + c + a, 0)], n:[(a + b + c, 0)]})
+   path_columns.append({0:[(a + c + b, 0, 1), (c + a + b, 0, 1), (c + b + a, 0, 1)], n - 1:[(b + a + c, 0, 1), (b + c + a, 0, 1)], n:[(a + b + c, 0, 1)]})
    for i in range(n - 1):
       path_columns.append({})
       d3_path_column_maker(a + b + c, (n - i - 1) * (i + 2), path_columns[i], path_columns[i + 1])
@@ -95,7 +91,10 @@ def d3_path_column_maker(group, addition, previous_path_column, current_path_col
    for path_num in previous_path_column:
       if path_num + addition not in current_path_column:
          current_path_column[path_num + addition] = []
-      current_path_column[path_num + addition].append((group, path_num))
+      num_options = 0
+      for option in previous_path_column[path_num]:
+         num_options += option[2]
+      current_path_column[path_num + addition].append((group, path_num, num_options))
 
 
 def d3_path_finder(n):
@@ -110,7 +109,8 @@ def d3_path_finder(n):
    return d3_path_finder_recursive(n, share, share, share, share, share, share, abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns)
 
 def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_share, cba_share, abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=0, so_far=''):
-   solutions = []
+   solution = None
+   options = {}
    for abc_possibility in abc_path_columns[n - depth - 1][abc_share]:
       if depth == 0 and abc_possibility[0] != 'abc':
          continue
@@ -125,17 +125,26 @@ def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_
                               for cba_possibility in cba_path_columns[n - depth - 1][cba_share]:
                                  if abc_possibility[0] == cba_possibility[0]:
                                     if depth == n - 1:
-                                       solutions.append(so_far + abc_possibility[0])
+                                       solution = so_far + abc_possibility[0]
                                     else:
-                                       solutions.extend(d3_path_finder_recursive(n, abc_possibility[1], acb_possibility[1], bac_possibility[1], bca_possibility[1], cab_possibility[1], cba_possibility[1], abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=depth+1, so_far=so_far + abc_possibility[0]))
-   return solutions
+                                       options[(abc_possibility[2] + acb_possibility[2] + bac_possibility[2] + bca_possibility[2] + cab_possibility[2] + cba_possibility[2]) / 6.0] = [abc_possibility[1], acb_possibility[1], bac_possibility[1], bca_possibility[1], cab_possibility[1], cba_possibility[1], so_far + abc_possibility[0]]
+   if solution:
+      return solution
+   sorted_options = sorted(options.keys())
+   for i in range(len(sorted_options) - 1, -1, -1):
+      print(depth)
+      print(sorted_options[i])
+      solution = d3_path_finder_recursive(n, options[sorted_options[i]][0], options[sorted_options[i]][1], options[sorted_options[i]][2], options[sorted_options[i]][3], options[sorted_options[i]][4], options[sorted_options[i]][5], abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=depth+1, so_far=options[sorted_options[i]][6])
+      if solution:
+         return solution
+   return solution
 
 
 def d4_path_maker(n, a, b, c, d): #n is for number of sides of dice
    path_columns = []
-   #these tuples point to the map value of the previous column, in this case, all 0 because there isn't a previous column. 
+   #these tuples point to the map value of the previous column, in this case, all 0 because there isn't a previous column.
    #the second map inside the first and the second int in the tuple are how many cd strings are downstream.
-   path_columns.append({0:{0:{a + b + d + c:(0, 0), a + d + b + c: (0, 0), a + d + c + b:(0, 0), b + a + d + c:(0, 0), b + d + a + c:(0, 0), b + d + c + a:(0, 0), d + a + b + c:(0, 0), d + a + c + b:(0, 0), d + b + a + c:(0, 0), d + b + c + a:(0, 0), d + c + a + b:(0, 0), d + c + b + a:(0, 0)}, 1:{a + c + b + d:(0, 0), a + c + d + b:(0, 0), c + a + b + d:(0, 0), c + a + d + b:(0, 0), c + b + a + d:(0, 0), c + b + d + a:(0, 0), c + d + a + b:(0, 0), c + d + b + a:(0, 0)}}, n - 1:{1:{b + a + c + d:(0, 0), b + c + a + d:(0, 0), b + c + d + a:(0, 0)}}, n:{1:{a + b + c + d:(0, 0)}}})
+   path_columns.append({0:{0:{a + b + d + c:(0, 0, 1), a + d + b + c: (0, 0, 1), a + d + c + b:(0, 0, 1), b + a + d + c:(0, 0, 1), b + d + a + c:(0, 0, 1), b + d + c + a:(0, 0, 1), d + a + b + c:(0, 0, 1), d + a + c + b:(0, 0, 1), d + b + a + c:(0, 0, 1), d + b + c + a:(0, 0, 1), d + c + a + b:(0, 0, 1), d + c + b + a:(0, 0, 1)}, 1:{a + c + b + d:(0, 0, 1), a + c + d + b:(0, 0, 1), c + a + b + d:(0, 0, 1), c + a + d + b:(0, 0, 1), c + b + a + d:(0, 0, 1), c + b + d + a:(0, 0, 1), c + d + a + b:(0, 0, 1), c + d + b + a:(0, 0, 1)}}, n - 1:{1:{b + a + c + d:(0, 0, 1), b + c + a + d:(0, 0, 1), b + c + d + a:(0, 0, 1)}}, n:{1:{a + b + c + d:(0, 0, 1)}}})
    for i in range(n - 1):
       path_columns.append({})
       d4_path_column_maker(a + b + c + d, (n - i - 1), (i + 2), (n - i - 1) * (i + 2), path_columns[i], path_columns[i + 1])
@@ -173,7 +182,10 @@ def d4_path_column_maker(group, num_abs, add_cds, addition, previous_path_column
             current_path_column[path_num + addition + (num_abs * path_cd_num)][path_cd_num + add_cds] = {}
          if group in current_path_column[path_num + addition + (num_abs * path_cd_num)][path_cd_num + add_cds]:
             print('uh oh')
-         current_path_column[path_num + addition + (num_abs * path_cd_num)][path_cd_num + add_cds][group] = (path_num, path_cd_num)
+         num_options = 0
+         for egroup in previous_path_column[path_num][path_cd_num]:
+            num_options += previous_path_column[path_num][path_cd_num][egroup][2]
+         current_path_column[path_num + addition + (num_abs * path_cd_num)][path_cd_num + add_cds][group] = (path_num, path_cd_num, num_options)
 
 
 def d4_path_finder(n):
@@ -204,15 +216,12 @@ def d4_path_finder(n):
    share = pow(n, 4) / math.factorial(4)
    share_cd = pow(n, 2) / math.factorial(2)
    #print(share)
+   return ""
    return d4_path_finder_recursive(n, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, abcd_path_columns, abdc_path_columns, acbd_path_columns, acdb_path_columns, adbc_path_columns, adcb_path_columns, bacd_path_columns, badc_path_columns, bcad_path_columns, bcda_path_columns, bdac_path_columns, bdca_path_columns, cabd_path_columns, cadb_path_columns, cbad_path_columns, cbda_path_columns, cdab_path_columns, cdba_path_columns, dabc_path_columns, dacb_path_columns, dbac_path_columns, dbca_path_columns, dcab_path_columns, dcba_path_columns)
 
-#abcd_path_columns[n - depth - 1][abcd_share][cd_share][abcd_possibility][0], abdc_path_columns[n - depth - 1][abdc_share][dc_share][abcd_possibility][0], acbd_path_columns[n - depth - 1][acbd_share][bd_share][abcd_possibility][0], acdb_path_columns[n - depth - 1][acdb_share][db_share][abcd_possibility][0], adbc_path_columns[n - depth - 1][adbc_share][bc_share][abcd_possibility][0], adcb_path_columns[n - depth - 1][adcb_share][cb_share][abcd_possibility][0], bacd_path_columns[n - depth - 1][bacd_share][cd_share][abcd_possibility][0], badc_path_columns[n - depth - 1][badc_share][dc_share][abcd_possibility][0], bcad_path_columns[n - depth - 1][bcad_share][ad_share][abcd_possibility][0], bcda_path_columns[n - depth - 1][bcda_share][da_share][abcd_possibility][0], bdac_path_columns[n - depth - 1][bdac_share][ac_share][abcd_possibility][0], bdca_path_columns[n - depth - 1][bdca_share][ca_share][abcd_possibility][0], cabd_path_columns[n - depth - 1][cabd_share][bd_share][abcd_possibility][0], cadb_path_columns[n - depth - 1][cadb_share][db_share][abcd_possibility][0], cbad_path_columns[n - depth - 1][cbad_share][ad_share][abcd_possibility][0], cbda_path_columns[n - depth - 1][cbda_share][da_share][abcd_possibility][0], cdab_path_columns[n - depth - 1][cdab_share][ab_share][abcd_possibility][0], cdba_path_columns[n - depth - 1][cdba_share][ba_share][abcd_possibility][0], dabc_path_columns[n - depth - 1][dabc_share][bc_share][abcd_possibility][0], dacb_path_columns[n - depth - 1][dacb_share][cb_share][abcd_possibility][0], dbac_path_columns[n - depth - 1][dbac_share][ac_share][abcd_possibility][0], dbca_path_columns[n - depth - 1][dbca_share][ca_share][abcd_possibility][0], dcab_path_columns[n - depth - 1][dcab_share][ab_share][abcd_possibility][0], dcba_path_columns[n - depth - 1][dcba_share][ba_share][abcd_possibility][0], 
-
-#cdab_path_columns[n - depth - 1][cdab_share][ab_share][abcd_possibility][1], bdac_path_columns[n - depth - 1][bdac_share][ac_share][abcd_possibility][1], bcad_path_columns[n - depth - 1][bcad_share][ad_share][abcd_possibility][1], cdba_path_columns[n - depth - 1][cdba_share][ba_share][abcd_possibility][1], adbc_path_columns[n - depth - 1][adbc_share][bc_share][abcd_possibility][1], acbd_path_columns[n - depth - 1][acbd_share][bd_share][abcd_possibility][1], bdca_path_columns[n - depth - 1][bdca_share][ca_share][abcd_possibility][1], adcb_path_columns[n - depth - 1][adcb_share][cb_share][abcd_possibility][1], abcd_path_columns[n - depth - 1][abcd_share][cd_share][abcd_possibility][1], bcda_path_columns[n - depth - 1][bcda_share][da_share][abcd_possibility][1], acdb_path_columns[n - depth - 1][acdb_share][db_share][abcd_possibility][1], abdc_path_columns[n - depth - 1][abdc_share][dc_share][abcd_possibility][1], 
-
-#abcd, abdc, acbd, acdb, adbc, adcb, bacd, badc, bcad, bcda, bdac, bdca, cabd, cadb, cbad, cbda, cdab, cdba, dabc, dacb, dbac, dbca, dcab, dcba, 
 def d4_path_finder_recursive(n, abcd_share, abdc_share, acbd_share, acdb_share, adbc_share, adcb_share, bacd_share, badc_share, bcad_share, bcda_share, bdac_share, bdca_share, cabd_share, cadb_share, cbad_share, cbda_share, cdab_share, cdba_share, dabc_share, dacb_share, dbac_share, dbca_share, dcab_share, dcba_share, ab_share, ac_share, ad_share, ba_share, bc_share, bd_share, ca_share, cb_share, cd_share, da_share, db_share, dc_share, abcd_path_columns, abdc_path_columns, acbd_path_columns, acdb_path_columns, adbc_path_columns, adcb_path_columns, bacd_path_columns, badc_path_columns, bcad_path_columns, bcda_path_columns, bdac_path_columns, bdca_path_columns, cabd_path_columns, cadb_path_columns, cbad_path_columns, cbda_path_columns, cdab_path_columns, cdba_path_columns, dabc_path_columns, dacb_path_columns, dbac_path_columns, dbca_path_columns, dcab_path_columns, dcba_path_columns, depth=0, so_far=''):
-   solutions = []
+   solution = None
+   options = {}
    for abcd_possibility in abcd_path_columns[n - depth - 1][abcd_share][cd_share]:
       if depth == 0 and abcd_possibility != 'abcd':
          continue
@@ -240,39 +249,29 @@ def d4_path_finder_recursive(n, abcd_share, abdc_share, acbd_share, acdb_share, 
                                                                      if abcd_possibility in dcab_path_columns[n - depth - 1][dcab_share][ab_share]:
                                                                         if abcd_possibility in dcba_path_columns[n - depth - 1][dcba_share][ba_share]:
                                                                            if depth == n - 1:
-                                                                              solutions.append(so_far + abcd_possibility)
+                                                                              solution = so_far + abcd_possibility
                                                                            else:
-                                                                              solutions.extend(d4_path_finder_recursive(n, abcd_path_columns[n - depth - 1][abcd_share][cd_share][abcd_possibility][0], abdc_path_columns[n - depth - 1][abdc_share][dc_share][abcd_possibility][0], acbd_path_columns[n - depth - 1][acbd_share][bd_share][abcd_possibility][0], acdb_path_columns[n - depth - 1][acdb_share][db_share][abcd_possibility][0], adbc_path_columns[n - depth - 1][adbc_share][bc_share][abcd_possibility][0], adcb_path_columns[n - depth - 1][adcb_share][cb_share][abcd_possibility][0], bacd_path_columns[n - depth - 1][bacd_share][cd_share][abcd_possibility][0], badc_path_columns[n - depth - 1][badc_share][dc_share][abcd_possibility][0], bcad_path_columns[n - depth - 1][bcad_share][ad_share][abcd_possibility][0], bcda_path_columns[n - depth - 1][bcda_share][da_share][abcd_possibility][0], bdac_path_columns[n - depth - 1][bdac_share][ac_share][abcd_possibility][0], bdca_path_columns[n - depth - 1][bdca_share][ca_share][abcd_possibility][0], cabd_path_columns[n - depth - 1][cabd_share][bd_share][abcd_possibility][0], cadb_path_columns[n - depth - 1][cadb_share][db_share][abcd_possibility][0], cbad_path_columns[n - depth - 1][cbad_share][ad_share][abcd_possibility][0], cbda_path_columns[n - depth - 1][cbda_share][da_share][abcd_possibility][0], cdab_path_columns[n - depth - 1][cdab_share][ab_share][abcd_possibility][0], cdba_path_columns[n - depth - 1][cdba_share][ba_share][abcd_possibility][0], dabc_path_columns[n - depth - 1][dabc_share][bc_share][abcd_possibility][0], dacb_path_columns[n - depth - 1][dacb_share][cb_share][abcd_possibility][0], dbac_path_columns[n - depth - 1][dbac_share][ac_share][abcd_possibility][0], dbca_path_columns[n - depth - 1][dbca_share][ca_share][abcd_possibility][0], dcab_path_columns[n - depth - 1][dcab_share][ab_share][abcd_possibility][0], dcba_path_columns[n - depth - 1][dcba_share][ba_share][abcd_possibility][0], cdab_path_columns[n - depth - 1][cdab_share][ab_share][abcd_possibility][1], bdac_path_columns[n - depth - 1][bdac_share][ac_share][abcd_possibility][1], bcad_path_columns[n - depth - 1][bcad_share][ad_share][abcd_possibility][1], cdba_path_columns[n - depth - 1][cdba_share][ba_share][abcd_possibility][1], adbc_path_columns[n - depth - 1][adbc_share][bc_share][abcd_possibility][1], acbd_path_columns[n - depth - 1][acbd_share][bd_share][abcd_possibility][1], bdca_path_columns[n - depth - 1][bdca_share][ca_share][abcd_possibility][1], adcb_path_columns[n - depth - 1][adcb_share][cb_share][abcd_possibility][1], abcd_path_columns[n - depth - 1][abcd_share][cd_share][abcd_possibility][1], bcda_path_columns[n - depth - 1][bcda_share][da_share][abcd_possibility][1], acdb_path_columns[n - depth - 1][acdb_share][db_share][abcd_possibility][1], abdc_path_columns[n - depth - 1][abdc_share][dc_share][abcd_possibility][1], abcd_path_columns, abdc_path_columns, acbd_path_columns, acdb_path_columns, adbc_path_columns, adcb_path_columns, bacd_path_columns, badc_path_columns, bcad_path_columns, bcda_path_columns, bdac_path_columns, bdca_path_columns, cabd_path_columns, cadb_path_columns, cbad_path_columns, cbda_path_columns, cdab_path_columns, cdba_path_columns, dabc_path_columns, dacb_path_columns, dbac_path_columns, dbca_path_columns, dcab_path_columns, dcba_path_columns, depth=depth+1, so_far=so_far + abcd_possibility))
-   return solutions
+                                                                              av = (abcd_path_columns[n - depth - 1][abcd_share][cd_share][abcd_possibility][2] + abdc_path_columns[n - depth - 1][abdc_share][dc_share][abcd_possibility][2] + acbd_path_columns[n - depth - 1][acbd_share][bd_share][abcd_possibility][2] + acdb_path_columns[n - depth - 1][acdb_share][db_share][abcd_possibility][2] + adbc_path_columns[n - depth - 1][adbc_share][bc_share][abcd_possibility][2] + adcb_path_columns[n - depth - 1][adcb_share][cb_share][abcd_possibility][2] + bacd_path_columns[n - depth - 1][bacd_share][cd_share][abcd_possibility][2] + badc_path_columns[n - depth - 1][badc_share][dc_share][abcd_possibility][2] + bcad_path_columns[n - depth - 1][bcad_share][ad_share][abcd_possibility][2] + bcda_path_columns[n - depth - 1][bcda_share][da_share][abcd_possibility][2] + bdac_path_columns[n - depth - 1][bdac_share][ac_share][abcd_possibility][2] + bdca_path_columns[n - depth - 1][bdca_share][ca_share][abcd_possibility][2] + cabd_path_columns[n - depth - 1][cabd_share][bd_share][abcd_possibility][2] + cadb_path_columns[n - depth - 1][cadb_share][db_share][abcd_possibility][2] + cbad_path_columns[n - depth - 1][cbad_share][ad_share][abcd_possibility][2] + cbda_path_columns[n - depth - 1][cbda_share][da_share][abcd_possibility][2] + cdab_path_columns[n - depth - 1][cdab_share][ab_share][abcd_possibility][2] + cdba_path_columns[n - depth - 1][cdba_share][ba_share][abcd_possibility][2] + dabc_path_columns[n - depth - 1][dabc_share][bc_share][abcd_possibility][2] + dacb_path_columns[n - depth - 1][dacb_share][cb_share][abcd_possibility][2] + dbac_path_columns[n - depth - 1][dbac_share][ac_share][abcd_possibility][2] + dbca_path_columns[n - depth - 1][dbca_share][ca_share][abcd_possibility][2] + dcab_path_columns[n - depth - 1][dcab_share][ab_share][abcd_possibility][2] + dcba_path_columns[n - depth - 1][dcba_share][ba_share][abcd_possibility][2]) / 24.0
+                                                                              options[av] = [abcd_path_columns[n - depth - 1][abcd_share][cd_share][abcd_possibility][0], abdc_path_columns[n - depth - 1][abdc_share][dc_share][abcd_possibility][0], acbd_path_columns[n - depth - 1][acbd_share][bd_share][abcd_possibility][0], acdb_path_columns[n - depth - 1][acdb_share][db_share][abcd_possibility][0], adbc_path_columns[n - depth - 1][adbc_share][bc_share][abcd_possibility][0], adcb_path_columns[n - depth - 1][adcb_share][cb_share][abcd_possibility][0], bacd_path_columns[n - depth - 1][bacd_share][cd_share][abcd_possibility][0], badc_path_columns[n - depth - 1][badc_share][dc_share][abcd_possibility][0], bcad_path_columns[n - depth - 1][bcad_share][ad_share][abcd_possibility][0], bcda_path_columns[n - depth - 1][bcda_share][da_share][abcd_possibility][0], bdac_path_columns[n - depth - 1][bdac_share][ac_share][abcd_possibility][0], bdca_path_columns[n - depth - 1][bdca_share][ca_share][abcd_possibility][0], cabd_path_columns[n - depth - 1][cabd_share][bd_share][abcd_possibility][0], cadb_path_columns[n - depth - 1][cadb_share][db_share][abcd_possibility][0], cbad_path_columns[n - depth - 1][cbad_share][ad_share][abcd_possibility][0], cbda_path_columns[n - depth - 1][cbda_share][da_share][abcd_possibility][0], cdab_path_columns[n - depth - 1][cdab_share][ab_share][abcd_possibility][0], cdba_path_columns[n - depth - 1][cdba_share][ba_share][abcd_possibility][0], dabc_path_columns[n - depth - 1][dabc_share][bc_share][abcd_possibility][0], dacb_path_columns[n - depth - 1][dacb_share][cb_share][abcd_possibility][0], dbac_path_columns[n - depth - 1][dbac_share][ac_share][abcd_possibility][0], dbca_path_columns[n - depth - 1][dbca_share][ca_share][abcd_possibility][0], dcab_path_columns[n - depth - 1][dcab_share][ab_share][abcd_possibility][0], dcba_path_columns[n - depth - 1][dcba_share][ba_share][abcd_possibility][0], cdab_path_columns[n - depth - 1][cdab_share][ab_share][abcd_possibility][1], bdac_path_columns[n - depth - 1][bdac_share][ac_share][abcd_possibility][1], bcad_path_columns[n - depth - 1][bcad_share][ad_share][abcd_possibility][1], cdba_path_columns[n - depth - 1][cdba_share][ba_share][abcd_possibility][1], adbc_path_columns[n - depth - 1][adbc_share][bc_share][abcd_possibility][1], acbd_path_columns[n - depth - 1][acbd_share][bd_share][abcd_possibility][1], bdca_path_columns[n - depth - 1][bdca_share][ca_share][abcd_possibility][1], adcb_path_columns[n - depth - 1][adcb_share][cb_share][abcd_possibility][1], abcd_path_columns[n - depth - 1][abcd_share][cd_share][abcd_possibility][1], bcda_path_columns[n - depth - 1][bcda_share][da_share][abcd_possibility][1], acdb_path_columns[n - depth - 1][acdb_share][db_share][abcd_possibility][1], abdc_path_columns[n - depth - 1][abdc_share][dc_share][abcd_possibility][1], so_far + abcd_possibility]
+   if solution:
+      return solution
+   sorted_options = sorted(options.keys())
+   for i in range(len(sorted_options) - 1, -1, -1):
+      print(depth)
+      print(sorted_options[i])
+      solution = d4_path_finder_recursive(n, options[sorted_options[i]][0], options[sorted_options[i]][1], options[sorted_options[i]][2], options[sorted_options[i]][3], options[sorted_options[i]][4], options[sorted_options[i]][5], options[sorted_options[i]][6], options[sorted_options[i]][7], options[sorted_options[i]][8], options[sorted_options[i]][9], options[sorted_options[i]][10], options[sorted_options[i]][11], options[sorted_options[i]][12], options[sorted_options[i]][13], options[sorted_options[i]][14], options[sorted_options[i]][15], options[sorted_options[i]][16], options[sorted_options[i]][17], options[sorted_options[i]][18], options[sorted_options[i]][19], options[sorted_options[i]][20], options[sorted_options[i]][21], options[sorted_options[i]][22], options[sorted_options[i]][23], options[sorted_options[i]][24], options[sorted_options[i]][25], options[sorted_options[i]][26], options[sorted_options[i]][27], options[sorted_options[i]][28], options[sorted_options[i]][29], options[sorted_options[i]][30], options[sorted_options[i]][31], options[sorted_options[i]][32], options[sorted_options[i]][33], options[sorted_options[i]][34], options[sorted_options[i]][35], abcd_path_columns, abdc_path_columns, acbd_path_columns, acdb_path_columns, adbc_path_columns, adcb_path_columns, bacd_path_columns, badc_path_columns, bcad_path_columns, bcda_path_columns, bdac_path_columns, bdca_path_columns, cabd_path_columns, cadb_path_columns, cbad_path_columns, cbda_path_columns, cdab_path_columns, cdba_path_columns, dabc_path_columns, dacb_path_columns, dbac_path_columns, dbca_path_columns, dcab_path_columns, dcba_path_columns, depth=depth+1, so_far=options[sorted_options[i]][36])
+      if solution:
+         return solution
+   return solution
 
-#i = 0
-#for path_column in d4_path_maker(2, 'a', 'b', 'c', 'd'):
-#   print(i)
-#   print(path_column)
-#   n = 0
-#   if i == 1:
-#      for index in path_column:
-#         n += index
-#   print(n)
-#   i += 1
 
-#print(d4_path_maker(12, 'a', 'b', 'c', 'd')[11][864][72])
-#print(d4_path_maker(6, 'a', 'b', 'c', 'd')[5][54][18])
-
-n = 12
-share = pow(n, 4) / math.factorial(4)
-solutions = d4_path_finder(n)
-print(len(solutions))
-i = 0
-for solution in solutions:
-   if not checker(solution, 4, share):
-      print('oh no!')
-   print(solution)
-   i += 1
-print(i)
-#for solution in condenser(solutions):
-#   if not checker(solution, 4, share):
-#      print('oh no!')
-#   print(solution)
-#   i += 1
-#print(i)
+d = 4
+n = 18
+share = pow(n, d) / math.factorial(d)
+if d == 3:
+   solution = d3_path_finder(n)
+elif d == 4:
+   solution = d4_path_finder(n)
+if not checker(solution, d, share):
+   print('oh no!')
+print(solution)
