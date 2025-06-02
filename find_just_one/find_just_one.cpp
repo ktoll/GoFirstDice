@@ -128,6 +128,71 @@ void print_path_column(int n, int column, int **** paths) {
    }
 }
 
+
+string get_group(int i) {
+   string group = "";
+   if (i == 0) {
+      group = "abc";
+   } else if (i == 1) {
+      group = "acb";
+   } else if (i == 2) {
+      group = "bac";
+   } else if (i == 3) {
+      group = "bca";
+   } else if (i == 4) {
+      group = "cab";
+   } else if (i == 5) {
+      group = "cba";
+   }
+   return group;
+}
+
+
+vector<string> path_finder_recursive(int n, int shares[], int translator[6][6], int **** paths, int depth, string so_far) {
+   vector<string> solutions = {};
+   int maximum;
+   if (depth == 0) {
+      maximum = 1;
+   } else {
+      maximum = 6;
+   }
+   for (int i = 0; i < maximum; i++) {
+      if (paths[n - depth - 1][shares[0]][i]) {
+         bool good = true;
+         int next_shares[6] = {-1, -1, -1, -1, -1, -1};
+         next_shares[0] = paths[n - depth - 1][shares[0]][i][0];
+         for (int j = 1; j < 6; j++) {
+            if (paths[n - depth - 1][shares[j]][translator[j][i]]) {
+               next_shares[j] = paths[n - depth - 1][shares[j]][translator[j][i]][0];
+            } else {
+               good = false;
+            }
+         }
+         if (good) {
+            if (depth == n - 1) {
+               solutions.push_back(so_far + get_group(i));
+            } else {
+               vector<string> more_solutions = path_finder_recursive(n, next_shares, translator, paths, depth + 1, so_far + get_group(i));
+               solutions.insert(solutions.end(), more_solutions.begin(), more_solutions.end());
+            }
+         }
+      }
+   }
+   return solutions;
+}
+
+vector<string> path_finder_3d(int n, int share, int **** paths) {
+   int shares[6] = {share, share, share, share, share, share};
+   int translator[6][6] = {{0, 1, 2, 3, 4, 5}, \
+                           {1, 0, 4, 5, 2, 3}, \
+                           {2, 3, 0, 1, 5, 4}, \
+                           {4, 5, 1, 0, 3, 2}, \
+                           {3, 2, 5, 4, 0, 1}, \
+                           {5, 4, 3, 2, 1, 0}};
+   return path_finder_recursive(n, shares, translator, paths, 0, "");
+}
+
+
 void why(int **** paths) {
    cout << "&paths ";
    cout << &paths;
@@ -148,11 +213,15 @@ int main() {
    int n = 6;
    int share = pow(n, d) / factorial(d);
    if (d == 3) {
-      int **** paths;
-      paths = new int *** [n];
+      int **** paths = new int *** [n];
       path_maker_3d(n, paths);
+      vector<string> solutions = path_finder_3d(n, share, paths);
+      for (string solution: solutions) {
+         cout << solution + "\n";
+      }
       //why(paths);
-      print_path_column(n, 0, paths);
-      print_path_column(n, n - 1, paths);
+      //print_path_column(n, 0, paths);
+      //print_path_column(n, 1, paths);
+      //print_path_column(n, n - 1, paths);
    }
 }
