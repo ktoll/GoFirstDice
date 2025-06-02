@@ -82,7 +82,7 @@ void path_maker_3d(int n, int **** paths) {
    }
 }
 
-void print_path_column(int n, int column, int **** paths) {
+void print_path_column_3d(int n, int column, int **** paths) {
    cout << "column: ";
    cout << column;
    cout << "\n";
@@ -148,9 +148,12 @@ string get_group(int i) {
 }
 
 
-vector<string> path_finder_recursive(int n, int shares[], int translator[6][6], int **** paths, int depth, string so_far) {
+vector<string> path_finder_recursive(int n, int shares[], int translator[6][6], int w, int **** paths, int depth, string so_far) {
    vector<string> solutions = {};
    int maximum;
+   int likeliests[w][6] = {{-1}};
+   int likeliest_quantity[w] = {-1};
+   string likeliest_group[w] = {""};
    if (depth == 0) {
       maximum = 1;
    } else {
@@ -160,28 +163,56 @@ vector<string> path_finder_recursive(int n, int shares[], int translator[6][6], 
       if (paths[n - depth - 1][shares[0]][i]) {
          bool good = true;
          int next_shares[6] = {-1, -1, -1, -1, -1, -1};
+         int combined_path_options = paths[n - depth - 1][shares[0]][i][1];
          next_shares[0] = paths[n - depth - 1][shares[0]][i][0];
          for (int j = 1; j < 6; j++) {
             if (paths[n - depth - 1][shares[j]][translator[j][i]]) {
                next_shares[j] = paths[n - depth - 1][shares[j]][translator[j][i]][0];
+               combined_path_options += paths[n - depth - 1][shares[j]][translator[j][i]][1];
             } else {
                good = false;
             }
          }
          if (good) {
-            if (depth == n - 1) {
-               solutions.push_back(so_far + get_group(i));
-            } else {
-               vector<string> more_solutions = path_finder_recursive(n, next_shares, translator, paths, depth + 1, so_far + get_group(i));
-               solutions.insert(solutions.end(), more_solutions.begin(), more_solutions.end());
+            int insertion_point = -1;
+            for (int k = 0; k < w; k++) {
+               if (combined_path_options > likeliest_quantity[k]) {
+                  if (insertion_point == -1) {
+                     insertion_point = k;
+                  }
+               }
             }
+            if (insertion_point > -1) {
+               for (int k = w - 1; k > insertion_point; k--) {
+                  for (int m = 0; m < 6; m ++) {
+                     likeliests[k][m] = likeliests[k - 1][m];
+                  }
+                  likeliest_quantity[k] = likeliest_quantity[k - 1];
+                  likeliest_group[k] = likeliest_group[k - 1];
+               }
+               for (int m = 0; m < 6; m++) {
+                  likeliests[insertion_point][m] = next_shares[m];
+               }
+               likeliest_quantity[insertion_point] = combined_path_options;
+               likeliest_group[insertion_point] = get_group(i);
+            }
+         }
+      }
+   }
+   for (int k = 0; k < w; k++) {
+      if (likeliest_quantity[k] > 0) {
+         if (depth == n - 1) {
+            solutions.push_back(so_far + likeliest_group[k]);
+         } else {
+            vector<string> more_solutions = path_finder_recursive(n, likeliests[k], translator, w, paths, depth + 1, so_far + likeliest_group[k]);
+            solutions.insert(solutions.end(), more_solutions.begin(), more_solutions.end());
          }
       }
    }
    return solutions;
 }
 
-vector<string> path_finder_3d(int n, int share, int **** paths) {
+vector<string> path_finder_3d(int n, int share, int w, int **** paths) {
    int shares[6] = {share, share, share, share, share, share};
    int translator[6][6] = {{0, 1, 2, 3, 4, 5}, \
                            {1, 0, 4, 5, 2, 3}, \
@@ -189,8 +220,55 @@ vector<string> path_finder_3d(int n, int share, int **** paths) {
                            {4, 5, 1, 0, 3, 2}, \
                            {3, 2, 5, 4, 0, 1}, \
                            {5, 4, 3, 2, 1, 0}};
-   return path_finder_recursive(n, shares, translator, paths, 0, "");
+   return path_finder_recursive(n, shares, translator, w, paths, 0, "");
 }
+
+
+//void print_path_column_4d(int n, int column, int ***** paths) {
+//   cout << "column: ";
+//   cout << column;
+//   cout << "\n";
+//   int maximum = n;
+//   for (int i = 0; i < column; i++) {
+//      maximum += (i + 2) * (n - i - 1);
+//      paths[i] = new int ** [maximum];
+//      for (int j = 0; j < maximum; j++) {
+//         paths[i][j] = NULL;
+//      }
+//   }
+//   if (paths[column]) {
+//      for (int i = 0; i < maximum + 1; i++) {
+//         if (paths[column][i]) {
+//            cout << "   share: ";
+//            cout << i;
+//            cout << "\n";
+//            for (int j = 0; j < 6; j++) {
+//               if (paths[column][i][j]) {
+//                  if (j == 0) {
+//                     cout << "      abc\n";
+//                  } else if (j == 1) {
+//                     cout << "      acb\n";
+//                  } else if (j == 2) {
+//                     cout << "      bac\n";
+//                  } else if (j == 3) {
+//                     cout << "      bca\n";
+//                  } else if (j == 4) {
+//                     cout << "      cab\n";
+//                  } else if (j == 5) {
+//                     cout << "      cba\n";
+//                  }
+//                  cout << "         prev share: ";
+//                  cout << paths[column][i][j][0];
+//                  cout << "\n";
+//                  cout << "         num paths: ";
+//                  cout << paths[column][i][j][1];
+//                  cout << "\n";
+//               }
+//            }
+//         }
+//      }
+//   }
+//}
 
 
 void why(int **** paths) {
@@ -210,18 +288,25 @@ void why(int **** paths) {
 
 int main() {
    int d = 3;
-   int n = 6;
+   int n = 12;
+   int w = 1; // search width
    int share = pow(n, d) / factorial(d);
    if (d == 3) {
       int **** paths = new int *** [n];
       path_maker_3d(n, paths);
-      vector<string> solutions = path_finder_3d(n, share, paths);
+      vector<string> solutions = path_finder_3d(n, share, w, paths);
       for (string solution: solutions) {
          cout << solution + "\n";
       }
       //why(paths);
-      //print_path_column(n, 0, paths);
-      //print_path_column(n, 1, paths);
-      //print_path_column(n, n - 1, paths);
+      //print_path_column_3d(n, 0, paths);
+      //print_path_column_3d(n, 1, paths);
+      //print_path_column_3d(n, n - 1, paths);
+   } else if (d == 4) {
+      //int ***** paths = new int **** [n];
+      //path_maker_4d(n, paths);
+      //print_path_column_4d(n, 0, paths);
+      //print_path_column_4d(n, 1, paths);
+      //print_path_column_4d(n, n - 1, paths);
    }
 }
