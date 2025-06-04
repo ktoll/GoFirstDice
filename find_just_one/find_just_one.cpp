@@ -522,10 +522,16 @@ vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsig
 
 
 int main() {
-   int d = 4;
-   int n = 18;
-   int w = 5; // search width
+   int d = 3;
+   int n = 6;
+   int w = 3; // search width
    int share = pow(n, d) / factorial(d);
+   // max order of magnitude
+   unsigned long long magnitude = 0;
+   for (int i = 0; i < n; i++) {
+      magnitude += pow(w, i);
+   }
+   cout << magnitude << "\n";
    if (d == 3) {
       tuple<unsigned int, unsigned long> **** paths = new tuple<unsigned int, unsigned long> *** [n];
       path_maker_3d(n, paths);
