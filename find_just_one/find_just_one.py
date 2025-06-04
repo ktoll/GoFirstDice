@@ -269,7 +269,7 @@ def d4_path_finder_recursive(n, abcd_share, abdc_share, acbd_share, acdb_share, 
 
 
 d = 3
-n = 30
+n = 6
 share = pow(n, d) / math.factorial(d)
 if d == 3:
    solution = d3_path_finder(n)

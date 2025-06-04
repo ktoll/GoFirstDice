@@ -139,19 +139,27 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
          bool good = true;
          int next_shares[6] = {-1, -1, -1, -1, -1, -1};
          unsigned long long combined_path_options = get<1>(*paths[n - depth - 1][shares[0]][i]);
+         int share_minimum = get<0>(*paths[n - depth - 1][shares[0]][i]);
+         int share_maximum = get<0>(*paths[n - depth - 1][shares[0]][i]);
          next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][i]);
          for (int j = 1; j < 6; j++) {
             if (paths[n - depth - 1][shares[j]][translator[j][i]]) {
                next_shares[j] = get<0>(*paths[n - depth - 1][shares[j]][translator[j][i]]);
                combined_path_options += get<1>(*paths[n - depth - 1][shares[j]][translator[j][i]]);
+               if (share_minimum > get<0>(*paths[n - depth - 1][shares[0]][i])) {
+                  share_minimum = get<0>(*paths[n - depth - 1][shares[0]][i]);
+               } else if (share_maximum < get<0>(*paths[n - depth - 1][shares[0]][i])) {
+                  share_maximum = get<0>(*paths[n - depth - 1][shares[0]][i]);
+               }
             } else {
                good = false;
             }
          }
          if (good) {
+            int range = share_maximum - share_minimum;
             int insertion_point = -1;
             for (int k = 0; k < w; k++) {
-               if (combined_path_options >= likeliest_quantity[k]) {
+               if (range <= likeliest_quantity[k]) {
                   if (insertion_point == -1) {
                      insertion_point = k;
                   }
@@ -420,6 +428,8 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
          int next_shares[24] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
          int next_shares_cd[12] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
          unsigned long long combined_path_options = get<2>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         int share_minimum = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         int share_maximum = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          next_shares_cd[translator_cd[0]] = get<1>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          for (int j = 1; j < 24; j++) {
@@ -433,14 +443,20 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
                   }
                }
                next_shares_cd[translator_cd[j]] = get<1>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
+               if (share_minimum > get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i])) {
+                  share_minimum = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+               } else if (share_maximum < get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i])) {
+                  share_maximum = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+               }
             } else {
                good = false;
             }
          }
          if (good) {
+            int range = share_maximum - share_minimum;
             int insertion_point = -1;
             for (int k = 0; k < w; k++) {
-               if (combined_path_options > likeliest_quantity[k]) {
+               if (range <= likeliest_quantity[k]) {
                   if (insertion_point == -1) {
                      insertion_point = k;
                   }
