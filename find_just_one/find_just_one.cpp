@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <tuple>
 #include <math.h>
 
 using namespace std;
@@ -20,12 +21,12 @@ int factorial(int d) {
 
 // 3d ----------------------------------------------------------------------------------------------
 // path making
-void path_column_maker_3d(int group, int old_maximum, int addition, unsigned int *** previous_path_column, unsigned int *** current_path_column) {
-   unsigned int num_options;
-   for (int i = 0; i < old_maximum + 1; i++) {
+void path_column_maker_3d(int group, int old_maximum, int addition, tuple<unsigned int, unsigned long> *** previous_path_column, tuple<unsigned int, unsigned long> *** current_path_column) {
+   unsigned long num_options;
+   for (unsigned int i = 0; i < old_maximum + 1; i++) {
       if (previous_path_column[i]) {
          if (not current_path_column[i + addition]) {
-            current_path_column[i + addition] = new unsigned int * [6];
+            current_path_column[i + addition] = new tuple<unsigned int, unsigned long> * [6];
             for (int j = 0; j < 6; j++) {
                current_path_column[i + addition][j] = NULL;
             }
@@ -33,53 +34,46 @@ void path_column_maker_3d(int group, int old_maximum, int addition, unsigned int
          num_options = 0;
          for (int j = 0; j < 6; j++) {
             if (previous_path_column[i][j]) {
-               num_options += previous_path_column[i][j][1];
+               num_options += get<1>(*previous_path_column[i][j]);
             }
          }
-         current_path_column[i + addition][group] = new unsigned int [2];
-         current_path_column[i + addition][group][0] = i;
-         current_path_column[i + addition][group][1] = num_options;
+         current_path_column[i + addition][group] = new tuple<unsigned int, unsigned long>;
+         *current_path_column[i + addition][group] = make_tuple(i, num_options);
       }
    }
 }
 
-void path_maker_3d(int n, unsigned int **** paths) {
-   paths[0] = new unsigned int ** [n + 1];
+void path_maker_3d(int n, tuple<unsigned int, unsigned long> **** paths) {
+   paths[0] = new tuple<unsigned int, unsigned long> ** [n + 1];
    for (int i = 0; i < n + 1; i++) {
       paths[0][i] = NULL;
    }
-   paths[0][0] = new unsigned int * [6];
-   paths[0][n - 1] = new unsigned int * [6];
-   paths[0][n] = new unsigned int * [6];
+   paths[0][0] = new tuple<unsigned int, unsigned long> * [6];
+   paths[0][n - 1] = new tuple<unsigned int, unsigned long> * [6];
+   paths[0][n] = new tuple<unsigned int, unsigned long> * [6];
    for (int i = 0; i < 6; i++) {
       paths[0][0][i] = NULL;
       paths[0][n - 1][i] = NULL;
       paths[0][n][i] = NULL;
    }
-   paths[0][n][0] = new unsigned int [2];
-   paths[0][n][0][0] = 0;
-   paths[0][n][0][1] = 1;
-   paths[0][0][1] = new unsigned int [2];
-   paths[0][0][1][0] = 0;
-   paths[0][0][1][1] = 1;
-   paths[0][n - 1][2] = new unsigned int [2];
-   paths[0][n - 1][2][0] = 0;
-   paths[0][n - 1][2][1] = 1;
-   paths[0][n - 1][3] = new unsigned int [2];
-   paths[0][n - 1][3][0] = 0;
-   paths[0][n - 1][3][1] = 1;
-   paths[0][0][4] = new unsigned int [2];
-   paths[0][0][4][0] = 0;
-   paths[0][0][4][1] = 1;
-   paths[0][0][5] = new unsigned int [2];
-   paths[0][0][5][0] = 0;
-   paths[0][0][5][1] = 1;
+   paths[0][n][0] = new tuple<unsigned int, unsigned long>;
+   *paths[0][n][0] = make_tuple(0, 1);
+   paths[0][0][1] = new tuple<unsigned int, unsigned long>;
+   *paths[0][0][1] = make_tuple(0, 1);
+   paths[0][n - 1][2] = new tuple<unsigned int, unsigned long>;
+   *paths[0][n - 1][2] = make_tuple(0, 1);
+   paths[0][n - 1][3] = new tuple<unsigned int, unsigned long>;
+   *paths[0][n - 1][3] = make_tuple(0, 1);
+   paths[0][0][4] = new tuple<unsigned int, unsigned long>;
+   *paths[0][0][4] = make_tuple(0, 1);
+   paths[0][0][5] = new tuple<unsigned int, unsigned long>;
+   *paths[0][0][5] = make_tuple(0, 1);
    int maximum = n;
    int old_maximum = 0;
    for (int i = 0; i < n - 1; i++) {
       old_maximum = maximum;
       maximum += (i + 2) * (n - i - 1);
-      paths[i + 1] = new unsigned int ** [maximum + 1];
+      paths[i + 1] = new tuple<unsigned int, unsigned long> ** [maximum + 1];
       for (int j = 0; j < maximum + 1; j++) {
          paths[i + 1][j] = NULL;
       }
@@ -94,7 +88,7 @@ void path_maker_3d(int n, unsigned int **** paths) {
 
 
 // path printing
-void print_path_column_3d(int n, int column, unsigned int **** paths) {
+void print_path_column_3d(int n, int column, tuple<unsigned int, unsigned long> **** paths) {
    cout << "column: ";
    cout << column;
    cout << "\n";
@@ -114,10 +108,10 @@ void print_path_column_3d(int n, int column, unsigned int **** paths) {
                   cout << get_group_3d[j];
                   cout << "\n";
                   cout << "         prev share: ";
-                  cout << paths[column][i][j][0];
+                  cout << get<0>(*paths[column][i][j]);
                   cout << "\n";
                   cout << "         num paths: ";
-                  cout << paths[column][i][j][1];
+                  cout << get<1>(*paths[column][i][j]);
                   cout << "\n";
                }
             }
@@ -128,14 +122,11 @@ void print_path_column_3d(int n, int column, unsigned int **** paths) {
 
 
 // path searching
-vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6], int w, unsigned int **** paths, int depth, string so_far) {
-   cout << "depth ";
-   cout << depth;
-   cout << "\n";
+vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6], int w, tuple<unsigned int, unsigned long> **** paths, int depth, string so_far) {
    vector<string> solutions = {};
    int maximum;
    int likeliests[w][6] = {{-1}};
-   long likeliest_quantity[w] = {-1};
+   unsigned long long likeliest_quantity[w] = {0};
    string likeliest_group[w] = {""};
    if (depth == 0) {
       maximum = 1;
@@ -143,26 +134,20 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
       maximum = 6;
    }
    for (int i = 0; i < maximum; i++) {
-      cout << "group " + get_group_3d[i] + "\n";
+      //cout << "group " + get_group_3d[i] + "\n";
       if (paths[n - depth - 1][shares[0]][i]) {
          bool good = true;
          int next_shares[6] = {-1, -1, -1, -1, -1, -1};
-         long combined_path_options = paths[n - depth - 1][shares[0]][i][1];
-         next_shares[0] = paths[n - depth - 1][shares[0]][i][0];
-         //cout << paths[n - depth - 1][shares[0]][translator[0][i]][1];
-         //cout << "\n";
+         unsigned long long combined_path_options = get<1>(*paths[n - depth - 1][shares[0]][i]);
+         next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][i]);
          for (int j = 1; j < 6; j++) {
             if (paths[n - depth - 1][shares[j]][translator[j][i]]) {
-               next_shares[j] = paths[n - depth - 1][shares[j]][translator[j][i]][0];
-               combined_path_options += paths[n - depth - 1][shares[j]][translator[j][i]][1];
-               //cout << paths[n - depth - 1][shares[j]][translator[j][i]][1];
-               //cout << "\n";
+               next_shares[j] = get<0>(*paths[n - depth - 1][shares[j]][translator[j][i]]);
+               combined_path_options += get<1>(*paths[n - depth - 1][shares[j]][translator[j][i]]);
             } else {
                good = false;
             }
          }
-         cout << combined_path_options;
-         cout << "\n";
          if (good) {
             int insertion_point = -1;
             for (int k = 0; k < w; k++) {
@@ -170,10 +155,6 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
                   if (insertion_point == -1) {
                      insertion_point = k;
                   }
-               } else if (combined_path_options < -1) {
-                  cout << "oh no!\n";
-                  cout << combined_path_options;
-                  cout << "\n";
                }
             }
             if (insertion_point > -1) {
@@ -193,14 +174,8 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
          }
       }
    }
-   cout << "likeliest_quantity[0] ";
-   cout << likeliest_quantity[0];
-   cout << "\n";
    for (int k = 0; k < w; k++) {
       if (likeliest_quantity[k] > 0) {
-         cout << "likeliest_group[k] ";
-         cout << likeliest_group[k];
-         cout << "\n";
          if (depth == n - 1) {
             solutions.push_back(so_far + likeliest_group[k]);
          } else {
@@ -212,7 +187,7 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
    return solutions; 
 }
 
-vector<string> path_finder_3d(int n, int share, int w, unsigned int **** paths) {
+vector<string> path_finder_3d(int n, int share, int w, tuple<unsigned int, unsigned long> **** paths) {
    int shares[6] = {share, share, share, share, share, share};
    int translator[6][6] = {{0, 1, 2, 3, 4, 5}, \
                            {1, 0, 4, 5, 2, 3}, \
@@ -226,20 +201,20 @@ vector<string> path_finder_3d(int n, int share, int w, unsigned int **** paths) 
 
 // 4d ----------------------------------------------------------------------------------------------
 // path making
-void path_column_maker_4d(int group, int old_maximum, int old_maximum_cd, int maximum_cd, int num_abs, int add_cds, int addition, unsigned int **** previous_path_column, unsigned int **** current_path_column) {
-   unsigned int num_options;
-   for (int i = 0; i < old_maximum + 1; i++) {
+void path_column_maker_4d(int group, int old_maximum, int old_maximum_cd, int maximum_cd, int num_abs, int add_cds, int addition, tuple<unsigned int, unsigned int, unsigned long> **** previous_path_column, tuple<unsigned int, unsigned int, unsigned long> **** current_path_column) {
+   unsigned long num_options;
+   for (unsigned int i = 0; i < old_maximum + 1; i++) {
       if (previous_path_column[i]) {
-         for (int j = 0; j < old_maximum_cd + 1; j++) {
+         for (unsigned int j = 0; j < old_maximum_cd + 1; j++) {
             if (previous_path_column[i][j]) {
                if (not current_path_column[i + addition + (num_abs * j)]) {
-                  current_path_column[i + addition + (num_abs * j)] = new unsigned int ** [maximum_cd + 1];
+                  current_path_column[i + addition + (num_abs * j)] = new tuple<unsigned int, unsigned int, unsigned long> ** [maximum_cd + 1];
                   for (int k = 0; k < maximum_cd + 1; k++) {
                      current_path_column[i + addition + (num_abs * j)][k] = NULL;
                   }
                }
                if (not current_path_column[i + addition + (num_abs * j)][j + add_cds]) {
-                  current_path_column[i + addition + (num_abs * j)][j + add_cds] = new unsigned int * [24];
+                  current_path_column[i + addition + (num_abs * j)][j + add_cds] = new tuple<unsigned int, unsigned int, unsigned long> * [24];
                   for (int k = 0; k < 24; k++) {
                      current_path_column[i + addition + (num_abs * j)][j + add_cds][k] = NULL;
                   }
@@ -247,140 +222,90 @@ void path_column_maker_4d(int group, int old_maximum, int old_maximum_cd, int ma
                num_options = 0;
                for (int k = 0; k < 24; k++) {
                   if (previous_path_column[i][j][k]) {
-                     num_options += previous_path_column[i][j][k][2];
+                     num_options += get<2>(*previous_path_column[i][j][k]);
                   }
                }
-               current_path_column[i + addition + (num_abs * j)][j + add_cds][group] = new unsigned int [3];
-               current_path_column[i + addition + (num_abs * j)][j + add_cds][group][0] = i;
-               current_path_column[i + addition + (num_abs * j)][j + add_cds][group][1] = j;
-               current_path_column[i + addition + (num_abs * j)][j + add_cds][group][2] = num_options;
+               current_path_column[i + addition + (num_abs * j)][j + add_cds][group] = new tuple<unsigned int, unsigned int, unsigned long>;
+               *current_path_column[i + addition + (num_abs * j)][j + add_cds][group] = make_tuple(i, j, num_options);
             }
          }
       }
    }
 }
 
-void path_maker_4d(int n, unsigned int ***** paths) {
-   paths[0] = new unsigned int *** [n + 1];
+void path_maker_4d(int n, tuple<unsigned int, unsigned int, unsigned long> ***** paths) {
+   paths[0] = new tuple<unsigned int, unsigned int, unsigned long> *** [n + 1];
    for (int i = 0; i < n + 1; i++) {
       paths[0][i] = NULL;
    }
-   paths[0][0] = new unsigned int ** [2];
-   paths[0][n - 1] = new unsigned int ** [2];
-   paths[0][n] = new unsigned int ** [2];
+   paths[0][0] = new tuple<unsigned int, unsigned int, unsigned long> ** [2];
+   paths[0][n - 1] = new tuple<unsigned int, unsigned int, unsigned long> ** [2];
+   paths[0][n] = new tuple<unsigned int, unsigned int, unsigned long> ** [2];
    for (int i = 0; i < 2; i++) {
       paths[0][0][i] = NULL;
       paths[0][n - 1][i] = NULL;
       paths[0][n][i] = NULL;
    }
-   paths[0][0][0] = new unsigned int * [24];
-   paths[0][0][1] = new unsigned int * [24];
+   paths[0][0][0] = new tuple<unsigned int, unsigned int, unsigned long>* [24];
+   paths[0][0][1] = new tuple<unsigned int, unsigned int, unsigned long> * [24];
    paths[0][n - 1][0] = NULL;
-   paths[0][n - 1][1] = new unsigned int * [24];
+   paths[0][n - 1][1] = new tuple<unsigned int, unsigned int, unsigned long> * [24];
    paths[0][n][0] = NULL;
-   paths[0][n][1] = new unsigned int * [24];
+   paths[0][n][1] = new tuple<unsigned int, unsigned int, unsigned long> * [24];
    for (int i = 0; i < 24; i++) {
       paths[0][0][0][i] = NULL;
       paths[0][0][1][i] = NULL;
       paths[0][n - 1][1][i] = NULL;
       paths[0][n][1][i] = NULL;
    }
-   paths[0][n][1][0] = new unsigned int [3];
-   paths[0][n][1][0][0] = 0;
-   paths[0][n][1][0][1] = 0;
-   paths[0][n][1][0][2] = 1;
-   paths[0][0][0][1] = new unsigned int [3];
-   paths[0][0][0][1][0] = 0;
-   paths[0][0][0][1][1] = 0;
-   paths[0][0][0][1][2] = 1;
-   paths[0][0][1][2] = new unsigned int [3];
-   paths[0][0][1][2][0] = 0;
-   paths[0][0][1][2][1] = 0;
-   paths[0][0][1][2][2] = 1;
-   paths[0][0][1][3] = new unsigned int [3];
-   paths[0][0][1][3][0] = 0;
-   paths[0][0][1][3][1] = 0;
-   paths[0][0][1][3][2] = 1;
-   paths[0][0][0][4] = new unsigned int [3];
-   paths[0][0][0][4][0] = 0;
-   paths[0][0][0][4][1] = 0;
-   paths[0][0][0][4][2] = 1;
-   paths[0][0][0][5] = new unsigned int [3];
-   paths[0][0][0][5][0] = 0;
-   paths[0][0][0][5][1] = 0;
-   paths[0][0][0][5][2] = 1;
-   paths[0][n - 1][1][6] = new unsigned int [3];
-   paths[0][n - 1][1][6][0] = 0;
-   paths[0][n - 1][1][6][1] = 0;
-   paths[0][n - 1][1][6][2] = 1;
-   paths[0][0][0][7] = new unsigned int [3];
-   paths[0][0][0][7][0] = 0;
-   paths[0][0][0][7][1] = 0;
-   paths[0][0][0][7][2] = 1;
-   paths[0][n - 1][1][8] = new unsigned int [3];
-   paths[0][n - 1][1][8][0] = 0;
-   paths[0][n - 1][1][8][1] = 0;
-   paths[0][n - 1][1][8][2] = 1;
-   paths[0][n - 1][1][9] = new unsigned int [3];
-   paths[0][n - 1][1][9][0] = 0;
-   paths[0][n - 1][1][9][1] = 0;
-   paths[0][n - 1][1][9][2] = 1;
-   paths[0][0][0][10] = new unsigned int [3];
-   paths[0][0][0][10][0] = 0;
-   paths[0][0][0][10][1] = 0;
-   paths[0][0][0][10][2] = 1;
-   paths[0][0][0][11] = new unsigned int [3];
-   paths[0][0][0][11][0] = 0;
-   paths[0][0][0][11][1] = 0;
-   paths[0][0][0][11][2] = 1;
-   paths[0][0][1][12] = new unsigned int [3];
-   paths[0][0][1][12][0] = 0;
-   paths[0][0][1][12][1] = 0;
-   paths[0][0][1][12][2] = 1;
-   paths[0][0][1][13] = new unsigned int [3];
-   paths[0][0][1][13][0] = 0;
-   paths[0][0][1][13][1] = 0;
-   paths[0][0][1][13][2] = 1;
-   paths[0][0][1][14] = new unsigned int [3];
-   paths[0][0][1][14][0] = 0;
-   paths[0][0][1][14][1] = 0;
-   paths[0][0][1][14][2] = 1;
-   paths[0][0][1][15] = new unsigned int [3];
-   paths[0][0][1][15][0] = 0;
-   paths[0][0][1][15][1] = 0;
-   paths[0][0][1][15][2] = 1;
-   paths[0][0][1][16] = new unsigned int [3];
-   paths[0][0][1][16][0] = 0;
-   paths[0][0][1][16][1] = 0;
-   paths[0][0][1][16][2] = 1;
-   paths[0][0][1][17] = new unsigned int [3];
-   paths[0][0][1][17][0] = 0;
-   paths[0][0][1][17][1] = 0;
-   paths[0][0][1][17][2] = 1;
-   paths[0][0][0][18] = new unsigned int [3];
-   paths[0][0][0][18][0] = 0;
-   paths[0][0][0][18][1] = 0;
-   paths[0][0][0][18][2] = 1;
-   paths[0][0][0][19] = new unsigned int [3];
-   paths[0][0][0][19][0] = 0;
-   paths[0][0][0][19][1] = 0;
-   paths[0][0][0][19][2] = 1;
-   paths[0][0][0][20] = new unsigned int [3];
-   paths[0][0][0][20][0] = 0;
-   paths[0][0][0][20][1] = 0;
-   paths[0][0][0][20][2] = 1;
-   paths[0][0][0][21] = new unsigned int [3];
-   paths[0][0][0][21][0] = 0;
-   paths[0][0][0][21][1] = 0;
-   paths[0][0][0][21][2] = 1;
-   paths[0][0][0][22] = new unsigned int [3];
-   paths[0][0][0][22][0] = 0;
-   paths[0][0][0][22][1] = 0;
-   paths[0][0][0][22][2] = 1;
-   paths[0][0][0][23] = new unsigned int [3];
-   paths[0][0][0][23][0] = 0;
-   paths[0][0][0][23][1] = 0;
-   paths[0][0][0][23][2] = 1;
+   paths[0][n][1][0] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][n][1][0] = make_tuple(0, 0, 1);
+   paths[0][0][0][1] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][1] = make_tuple(0, 0, 1);
+   paths[0][0][1][2] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][1][2] = make_tuple(0, 0, 1);
+   paths[0][0][1][3] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][1][3] = make_tuple(0, 0, 1);
+   paths[0][0][0][4] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][4] = make_tuple(0, 0, 1);
+   paths[0][0][0][5] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][5] = make_tuple(0, 0, 1);
+   paths[0][n - 1][1][6] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][n - 1][1][6] = make_tuple(0, 0, 1);
+   paths[0][0][0][7] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][7] = make_tuple(0, 0, 1);
+   paths[0][n - 1][1][8] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][n - 1][1][8] = make_tuple(0, 0, 1);
+   paths[0][n - 1][1][9] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][n - 1][1][9] = make_tuple(0, 0, 1);
+   paths[0][0][0][10] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][10] = make_tuple(0, 0, 1);
+   paths[0][0][0][11] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][11] = make_tuple(0, 0, 1);
+   paths[0][0][1][12] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][1][12] = make_tuple(0, 0, 1);
+   paths[0][0][1][13] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][1][13] = make_tuple(0, 0, 1);
+   paths[0][0][1][14] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][1][14] = make_tuple(0, 0, 1);
+   paths[0][0][1][15] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][1][15] = make_tuple(0, 0, 1);
+   paths[0][0][1][16] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][1][16] = make_tuple(0, 0, 1);
+   paths[0][0][1][17] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][1][17] = make_tuple(0, 0, 1);
+   paths[0][0][0][18] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][18] = make_tuple(0, 0, 1);
+   paths[0][0][0][19] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][19] = make_tuple(0, 0, 1);
+   paths[0][0][0][20] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][20] = make_tuple(0, 0, 1);
+   paths[0][0][0][21] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][21] = make_tuple(0, 0, 1);
+   paths[0][0][0][22] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][22] = make_tuple(0, 0, 1);
+   paths[0][0][0][23] = new tuple<unsigned int, unsigned int, unsigned long>;
+   *paths[0][0][0][23] = make_tuple(0, 0, 1);
    int maximum = n;
    int maximum_cd = 1;
    int old_maximum = 0;
@@ -390,7 +315,7 @@ void path_maker_4d(int n, unsigned int ***** paths) {
       old_maximum_cd = maximum_cd;
       maximum += ((n - i - 1) * (i + 2)) + ((n - i - 1) * maximum_cd);
       maximum_cd += i + 2;
-      paths[i + 1] = new unsigned int *** [maximum + 1];
+      paths[i + 1] = new tuple<unsigned int, unsigned int, unsigned long> *** [maximum + 1];
       for (int j = 0; j < maximum + 1; j++) {
          paths[i + 1][j] = NULL;
       }
@@ -423,7 +348,7 @@ void path_maker_4d(int n, unsigned int ***** paths) {
 
 
 // path printing
-void print_path_column_4d(int n, int column, unsigned int ***** paths) {
+void print_path_column_4d(int n, int column, tuple<unsigned int, unsigned int, unsigned long> ***** paths) {
    cout << "column: ";
    cout << column;
    cout << "\n";
@@ -448,13 +373,13 @@ void print_path_column_4d(int n, int column, unsigned int ***** paths) {
                      if (paths[column][i][j][k]) {
                         cout << "         " + get_group_4d[k] + "\n";
                         cout << "         prev share: ";
-                        cout << paths[column][i][j][k][0];
+                        cout << get<0>(*paths[column][i][j][k]);
                         cout << "\n";
                         cout << "         prev share_cd: ";
-                        cout << paths[column][i][j][k][1];
+                        cout << get<1>(*paths[column][i][j][k]);
                         cout << "\n";
                         cout << "         num paths: ";
-                        cout << paths[column][i][j][k][2];
+                        cout << get<2>(*paths[column][i][j][k]);
                         cout << "\n";
                      }
                   }
@@ -467,15 +392,15 @@ void print_path_column_4d(int n, int column, unsigned int ***** paths) {
 
 
 // path searching
-vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, unsigned int ***** paths, int depth, string so_far) {
+vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, tuple<unsigned int, unsigned int, unsigned long> ***** paths, int depth, string so_far) {
    vector<string> solutions = {};
    int maximum;
    int likeliests[w][24] = {{-1}};
    int likeliests_cd[w][12] = {{-1}};
-   long likeliest_quantity[w] = {-1};
+   unsigned long long likeliest_quantity[w] = {0};
    string likeliest_group[w] = {""};
    for (int i = 0; i < w; i++) {
-      likeliest_quantity[i] = -1;
+      likeliest_quantity[i] = 0;
       likeliest_group[i] = "";
       for (int j = 0; j < 24; j++) {
          likeliests[i][j] = -1;
@@ -494,35 +419,20 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
          bool good = true;
          int next_shares[24] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
          int next_shares_cd[12] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-         long combined_path_options = paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i][2];
-         next_shares[0] = paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i][0];
-         next_shares_cd[translator_cd[0]] = paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i][1];
+         unsigned long long combined_path_options = get<2>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         next_shares_cd[translator_cd[0]] = get<1>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          for (int j = 1; j < 24; j++) {
             if (paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]) {
-               next_shares[j] = paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]][0];
-               combined_path_options += paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]][2];
+               next_shares[j] = get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
+               combined_path_options += get<2>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
                if (next_shares_cd[translator_cd[j]] > -1) {
-                  if (next_shares_cd[translator_cd[j]] != paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]][1]) {
-                     cout << "depth ";
-                     cout << depth;
-                     cout << "\n";
-                     cout << "i ";
-                     cout << i;
-                     cout << "\n";
-                     cout << "j ";
-                     cout << j;
-                     cout << "\n";
-                     cout << "next_shares_cd[translator_cd[j]] ";
-                     cout << next_shares_cd[translator_cd[j]];
-                     cout << "\n";
-                     cout << "paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]][1] ";
-                     cout << paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]][1];
-                     cout << "\n";
+                  if (next_shares_cd[translator_cd[j]] != get<1>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]])) {
                      cout << "uh oh\n";
                      good = false;
                   }
                }
-               next_shares_cd[translator_cd[j]] = paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]][1];
+               next_shares_cd[translator_cd[j]] = get<1>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
             } else {
                good = false;
             }
@@ -572,7 +482,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
    return solutions; 
 }
 
-vector<string> path_finder_4d(int n, int share, int w, unsigned int ***** paths) {
+vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsigned int, unsigned long> ***** paths) {
    int share_cd = pow(n, 2) / factorial(2);
    int shares[24] = {share};
    for (int i = 0; i < 24; i++) {
@@ -612,12 +522,12 @@ vector<string> path_finder_4d(int n, int share, int w, unsigned int ***** paths)
 
 
 int main() {
-   int d = 3;
-   int n = 24;
-   int w = 1; // search width
+   int d = 4;
+   int n = 18;
+   int w = 5; // search width
    int share = pow(n, d) / factorial(d);
    if (d == 3) {
-      unsigned int **** paths = new unsigned int *** [n];
+      tuple<unsigned int, unsigned long> **** paths = new tuple<unsigned int, unsigned long> *** [n];
       path_maker_3d(n, paths);
       vector<string> solutions = path_finder_3d(n, share, w, paths);
       for (string solution: solutions) {
@@ -627,7 +537,7 @@ int main() {
       //print_path_column_3d(n, 1, paths);
       //print_path_column_3d(n, n - 1, paths);
    } else if (d == 4) {
-      unsigned int ***** paths = new unsigned int **** [n];
+      tuple<unsigned int, unsigned int, unsigned long> ***** paths = new tuple<unsigned int, unsigned int, unsigned long> **** [n];
       path_maker_4d(n, paths);
       vector<string> solutions = path_finder_4d(n, share, w, paths);
       for (string solution: solutions) {

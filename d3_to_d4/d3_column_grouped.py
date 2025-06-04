@@ -129,7 +129,7 @@ def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_
 #for path_column in d3_path_maker(6, 'a', 'b', 'c'):
 #   print(path_column)
 
-n = 12
+n = 6
 solutions = d3_path_finder(n)
 share = pow(n, 3) / math.factorial(3)
 #for solution in condenser(solutions):

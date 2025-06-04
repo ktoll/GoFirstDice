@@ -127,6 +127,7 @@ def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_
                                     if depth == n - 1:
                                        solution = so_far + abc_possibility[0]
                                     else:
+                                       print(abc_possibility[2] + acb_possibility[2] + bac_possibility[2] + bca_possibility[2] + cab_possibility[2] + cba_possibility[2])
                                        options[(abc_possibility[2] + acb_possibility[2] + bac_possibility[2] + bca_possibility[2] + cab_possibility[2] + cba_possibility[2]) / 6.0] = [abc_possibility[1], acb_possibility[1], bac_possibility[1], bca_possibility[1], cab_possibility[1], cba_possibility[1], so_far + abc_possibility[0]]
    if solution:
       return solution
@@ -137,6 +138,8 @@ def d3_path_finder_recursive(n, abc_share, acb_share, bac_share, bca_share, cab_
       solution = d3_path_finder_recursive(n, options[sorted_options[i]][0], options[sorted_options[i]][1], options[sorted_options[i]][2], options[sorted_options[i]][3], options[sorted_options[i]][4], options[sorted_options[i]][5], abc_path_columns, acb_path_columns, bac_path_columns, bca_path_columns, cab_path_columns, cba_path_columns, depth=depth+1, so_far=options[sorted_options[i]][6])
       if solution:
          return solution
+      else:
+         print("hi")
    return solution
 
 
@@ -265,8 +268,8 @@ def d4_path_finder_recursive(n, abcd_share, abdc_share, acbd_share, acdb_share, 
    return solution
 
 
-d = 4
-n = 12
+d = 3
+n = 30
 share = pow(n, d) / math.factorial(d)
 if d == 3:
    solution = d3_path_finder(n)
