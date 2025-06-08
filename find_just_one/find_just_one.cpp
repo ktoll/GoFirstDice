@@ -125,13 +125,15 @@ void print_path_column_3d(int n, int column, tuple<unsigned int, unsigned long> 
 // path searching
 vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6], int w, tuple<unsigned int, unsigned long> **** paths, int depth, string so_far) {
    //cout << "path_finder_recursive_3d\n";
+   //cout << "depth " << depth << "\n";
+   //https://www.youtube.com/watch?v=cSV5um-zaiUcout << "so_far " << so_far << "\n";
    vector<string> solutions = {};
    int maximum;
    int likeliests[w][6] = {{-1}};
    unsigned long long likeliest_quantity[w] = {0};
    string likeliest_group[w] = {""};
    for (int i = 0; i < w; i++) {
-      likeliest_quantity[i] = ULLONG_MAX;
+      likeliest_quantity[i] = 0;
       likeliest_group[i] = "";
       for (int j = 0; j < 6; j++) {
          likeliests[i][j] = -1;
@@ -150,7 +152,7 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
          unsigned long long combined_path_options = get<1>(*paths[n - depth - 1][shares[0]][i]);
          int share_minimum = get<0>(*paths[n - depth - 1][shares[0]][i]);
          int share_maximum = get<0>(*paths[n - depth - 1][shares[0]][i]);
-         //unsigned long lowest_options = get<1>(*paths[n - depth - 1][shares[0]][i]);
+         unsigned long lowest_options = get<1>(*paths[n - depth - 1][shares[0]][i]);
          next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][i]);
          for (int j = 1; j < 6; j++) {
             if (paths[n - depth - 1][shares[j]][translator[j][i]]) {
@@ -161,9 +163,9 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
                } else if (share_maximum < get<0>(*paths[n - depth - 1][shares[j]][translator[j][i]])) {
                   share_maximum = get<0>(*paths[n - depth - 1][shares[j]][translator[j][i]]);
                }
-               //if (lowest_options > get<1>(*paths[n - depth - 1][shares[j]][i])) {
-               //   lowest_options = get<1>(*paths[n - depth - 1][shares[j]][i]);
-               //}
+               if (lowest_options > get<1>(*paths[n - depth - 1][shares[j]][translator[j][i]])) {
+                  lowest_options = get<1>(*paths[n - depth - 1][shares[j]][translator[j][i]]);
+               }
             } else {
                good = false;
             }
@@ -172,7 +174,7 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
             int range = share_maximum - share_minimum;
             int insertion_point = -1;
             for (int k = 0; k < w; k++) {
-               if (range <= likeliest_quantity[k]) {
+               if (lowest_options >= likeliest_quantity[k]) {
                   if (insertion_point == -1) {
                      insertion_point = k;
                   }
@@ -189,14 +191,14 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
                for (int m = 0; m < 6; m++) {
                   likeliests[insertion_point][m] = next_shares[m];
                }
-               likeliest_quantity[insertion_point] = combined_path_options;
+               likeliest_quantity[insertion_point] = lowest_options;
                likeliest_group[insertion_point] = get_group_3d[i];
             }
          }
       }
    }
    for (int k = 0; k < w; k++) {
-      if (likeliest_quantity[k] < ULLONG_MAX) {
+      if (likeliest_quantity[k] > 0) {
          if (depth == n - 1) {
             solutions.push_back(so_far + likeliest_group[k]);
          } else {
@@ -552,8 +554,8 @@ vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsig
 
 int main() {
    int d = 3;
-   int n = 12;
-   int w = 4; // search width
+   int n = 30;
+   int w = 1; // search width
    int share = pow(n, d) / factorial(d);
    // max order of magnitude
    unsigned long long magnitude = 0;
