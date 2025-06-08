@@ -189,7 +189,7 @@ vector<string> path_finder_recursive_3d(int n, int shares[], int translator[6][6
                for (int m = 0; m < 6; m++) {
                   likeliests[insertion_point][m] = next_shares[m];
                }
-               likeliest_quantity[insertion_point] = combined_path_options;
+               likeliest_quantity[insertion_point] = range;
                likeliest_group[insertion_point] = get_group_3d[i];
             }
          }
@@ -414,6 +414,7 @@ void print_path_column_4d(int n, int column, tuple<unsigned int, unsigned int, u
 
 // path searching
 vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, tuple<unsigned int, unsigned int, unsigned long> ***** paths, int depth, string so_far) {
+   cout << "path_finder_recursive_4d\n";
    vector<string> solutions = {};
    int maximum;
    int likeliests[w][24] = {{-1}};
@@ -421,6 +422,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
    unsigned long long likeliest_quantity[w] = {0};
    string likeliest_group[w] = {""};
    for (int i = 0; i < w; i++) {
+      cout << "group " << get_group_4d[i] << "\n";
       likeliest_quantity[i] = ULLONG_MAX;
       likeliest_group[i] = "";
       for (int j = 0; j < 24; j++) {
@@ -492,7 +494,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
                for (int m = 0; m < 12; m++) {
                   likeliests_cd[insertion_point][m] = next_shares_cd[m];
                }
-               likeliest_quantity[insertion_point] = combined_path_options;
+               likeliest_quantity[insertion_point] = range;
                likeliest_group[insertion_point] = get_group_4d[i];
             }
          }
@@ -551,9 +553,9 @@ vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsig
 
 
 int main() {
-   int d = 3;
+   int d = 4;
    int n = 12;
-   int w = 4; // search width
+   int w = 1; // search width
    int share = pow(n, d) / factorial(d);
    // max order of magnitude
    unsigned long long magnitude = 0;
