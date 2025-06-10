@@ -416,6 +416,7 @@ void print_path_column_4d(int n, int column, tuple<unsigned int, unsigned int, u
 
 // path searching
 vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, tuple<unsigned int, unsigned int, unsigned long> ***** paths, int depth, string so_far) {
+   //cout << "depth " << depth << "\n";
    vector<string> solutions = {};
    int maximum;
    int likeliests[w][24] = {{-1}};
@@ -423,7 +424,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
    unsigned long long likeliest_quantity[w] = {0};
    string likeliest_group[w] = {""};
    for (int i = 0; i < w; i++) {
-      likeliest_quantity[i] = ULLONG_MAX;
+      likeliest_quantity[i] = 0;
       likeliest_group[i] = "";
       for (int j = 0; j < 24; j++) {
          likeliests[i][j] = -1;
@@ -438,6 +439,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
       maximum = 24;
    }
    for (int i = 0; i < maximum; i++) {
+      //cout << "i " << i << "\n";
       if (paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]) {
          bool good = true;
          int next_shares[24] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
@@ -445,6 +447,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
          unsigned long long combined_path_options = get<2>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          int share_minimum = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          int share_maximum = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         unsigned long lowest_options = get<2>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          next_shares_cd[translator_cd[0]] = get<1>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
          for (int j = 1; j < 24; j++) {
@@ -458,10 +461,13 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
                   }
                }
                next_shares_cd[translator_cd[j]] = get<1>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
-               if (share_minimum > get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][i])) {
-                  share_minimum = get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][i]);
-               } else if (share_maximum < get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][i])) {
-                  share_maximum = get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][i]);
+               if (share_minimum > get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]])) {
+                  share_minimum = get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
+               } else if (share_maximum < get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]])) {
+                  share_maximum = get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
+               }
+               if (lowest_options > get<2>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]])) {
+                  lowest_options = get<2>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
                }
             } else {
                good = false;
@@ -471,7 +477,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
             int range = share_maximum - share_minimum;
             int insertion_point = -1;
             for (int k = 0; k < w; k++) {
-               if (range <= likeliest_quantity[k]) {
+               if (lowest_options >= likeliest_quantity[k]) {
                   if (insertion_point == -1) {
                      insertion_point = k;
                   }
@@ -494,14 +500,14 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
                for (int m = 0; m < 12; m++) {
                   likeliests_cd[insertion_point][m] = next_shares_cd[m];
                }
-               likeliest_quantity[insertion_point] = combined_path_options;
+               likeliest_quantity[insertion_point] = lowest_options;
                likeliest_group[insertion_point] = get_group_4d[i];
             }
          }
       }
    }
    for (int k = 0; k < w; k++) {
-      if (likeliest_quantity[k] < ULLONG_MAX) {
+      if (likeliest_quantity[k] > 0) {
          if (depth == n - 1) {
             solutions.push_back(so_far + likeliest_group[k]);
          } else {
@@ -553,9 +559,9 @@ vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsig
 
 
 int main() {
-   int d = 3;
-   int n = 30;
-   int w = 1; // search width
+   int d = 4;
+   int n = 12;
+   int w = 12; // search width
    int share = pow(n, d) / factorial(d);
    // max order of magnitude
    unsigned long long magnitude = 0;
