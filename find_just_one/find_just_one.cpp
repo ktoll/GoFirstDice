@@ -393,6 +393,16 @@ void print_path_column_4d(int n, int column, tuple<unsigned int, unsigned int, d
 
 // path searching
 vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, tuple<unsigned int, unsigned int, double> ***** paths, int depth, string so_far) {
+//   cout << "depth " << depth << "\n";
+//   cout << so_far << "\n";
+//   for (int i = 0; i < 24; i++) {
+//      cout << shares[i] << " ";
+//   }
+//   cout << "\n";
+//   for (int i = 0; i < 12; i++) {
+//      cout << shares_cd[i] << " ";
+//   }
+//   cout << "\n";
    vector<string> solutions = {};
    int maximum;
    int likeliests[w][24] = {{-1}};
@@ -438,6 +448,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
             }
          }
          if (good) {
+//            cout << "option: " << get_group_4d[i] << " " << combined_path_options << "\n";
             int insertion_point = -1;
             for (int k = 0; k < w; k++) {
                if (combined_path_options > likeliest_quantity[k]) {
@@ -479,6 +490,7 @@ vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], in
          }
       }
    }
+//   cout << likeliest_quantity[0] << "\n";
    return solutions; 
 }
 
@@ -521,17 +533,177 @@ vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsig
 }
 
 
+// path search analysis
+void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, tuple<unsigned int, unsigned int, double> ***** paths, int depth, string solution) {
+   cout << "depth " << depth << "\n";
+   cout << solution.substr(depth * 4, 4) << "\n";
+   for (int i = 0; i < 24; i++) {
+      cout << shares[i] << " ";
+   }
+   cout << "\n";
+   for (int i = 0; i < 12; i++) {
+      cout << shares_cd[i] << " ";
+   }
+   cout << "\n";
+   int current_group = -1;
+   for (int i = 0; i < 24; i++) {
+      if (solution.substr(depth * 4, 4) == get_group_4d[i]) {
+         current_group = i;
+      }
+   }
+   if (current_group < 0) {
+      cout << "oh nooo\n";
+      return;
+   }
+   int maximum;
+   int likeliests[w][24] = {{-1}};
+   int likeliests_cd[w][12] = {{-1}};
+   double likeliest_quantity[w] = {0};
+   string likeliest_group[w] = {""};
+   for (int i = 0; i < w; i++) {
+      likeliest_quantity[i] = 0;
+      likeliest_group[i] = "";
+      for (int j = 0; j < 24; j++) {
+         likeliests[i][j] = -1;
+      }
+      for (int j = 0; j < 12; j++) {
+         likeliests_cd[i][j] = -1;
+      }
+   }
+   if (depth == 0) {
+      maximum = 1;
+   } else {
+      maximum = 24;
+   }
+   for (int i = 0; i < maximum; i++) {
+      if (paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]) {
+         bool good = true;
+         int next_shares[24] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+         int next_shares_cd[12] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+         double combined_path_options = get<2>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         next_shares_cd[translator_cd[0]] = get<1>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         for (int j = 1; j < 24; j++) {
+            if (paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]) {
+               next_shares[j] = get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
+               combined_path_options += get<2>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
+               if (next_shares_cd[translator_cd[j]] > -1) {
+                  if (next_shares_cd[translator_cd[j]] != get<1>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]])) {
+                     cout << "uh oh\n";
+                     good = false;
+                  }
+               }
+               next_shares_cd[translator_cd[j]] = get<1>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
+            } else {
+               good = false;
+            }
+         }
+         if (good) {
+            cout << "option: " << get_group_4d[i] << " " << combined_path_options;
+            for (int g = 0; g < 24; g++) {
+               cout << " " << get<2>(*paths[n - depth - 1][shares[g]][shares_cd[translator_cd[g]]][translator[g][i]]);
+            }
+            if (current_group == i) {
+               cout << " should pick!\n";
+               for (int m = 0; m < 24; m++) {
+                  likeliests[0][m] = next_shares[m];
+               }
+               for (int m = 0; m < 12; m++) {
+                  likeliests_cd[0][m] = next_shares_cd[m];
+               }
+            }
+            else {
+               cout << "\n";
+            }
+            //int insertion_point = -1;
+            //for (int k = 0; k < w; k++) {
+            //   if (combined_path_options > likeliest_quantity[k]) {
+            //      if (insertion_point == -1) {
+            //         insertion_point = k;
+            //      }
+            //   }
+            //}
+            //if (insertion_point > -1) {
+            //   for (int k = w - 1; k > insertion_point; k--) {
+            //      for (int m = 0; m < 24; m++) {
+            //         likeliests[k][m] = likeliests[k - 1][m];
+            //      }
+            //      for (int m = 0; m < 12; m++) {
+            //         likeliests_cd[k][m] = likeliests_cd[k - 1][m];
+            //      }
+            //      likeliest_quantity[k] = likeliest_quantity[k - 1];
+            //      likeliest_group[k] = likeliest_group[k - 1];
+            //   }
+            //   for (int m = 0; m < 24; m++) {
+            //      likeliests[insertion_point][m] = next_shares[m];
+            //   }
+            //   for (int m = 0; m < 12; m++) {
+            //      likeliests_cd[insertion_point][m] = next_shares_cd[m];
+            //   }
+            //   likeliest_quantity[insertion_point] = combined_path_options;
+            //   likeliest_group[insertion_point] = get_group_4d[i];
+            //}
+         }
+      }
+   }
+   for (int k = 0; k < w; k++) {
+      if (depth == n - 1) {
+      } else {
+         path_analysis_recursive_4d(n, likeliests[k], likeliests_cd[k], translator, translator_cd, w, paths, depth + 1, solution);
+      }
+   }
+}
+
+void path_analysis_4d(int n, int share, int w, tuple<unsigned int, unsigned int, double> ***** paths, string solution) {
+   int share_cd = pow(n, 2) / factorial(2);
+   int shares[24] = {share};
+   for (int i = 0; i < 24; i++) {
+      shares[i] = share;
+   }
+   int shares_cd[12] = {share_cd};
+   for (int i = 0; i < 12; i++) {
+      shares_cd[i] = share_cd;
+   }
+   int translator[24][24] = {{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}, \
+                             { 1,  0,  4,  5,  2,  3,  7,  6, 10, 11,  8,  9, 18, 19, 20, 21, 22, 23, 12, 13, 14, 15, 16, 17}, \
+                             { 2,  3,  0,  1,  5,  4, 12, 13, 14, 15, 16, 17,  6,  7,  8,  9, 10, 11, 19, 18, 22, 23, 20, 21}, \
+                             { 4,  5,  1,  0,  3,  2, 18, 19, 20, 21, 22, 23,  7,  6, 10, 11,  8,  9, 13, 12, 16, 17, 14, 15}, \
+                             { 3,  2,  5,  4,  0,  1, 13, 12, 16, 17, 14, 15, 19, 18, 22, 23, 20, 21,  6,  7,  8,  9, 10, 11}, \
+                             { 5,  4,  3,  2,  1,  0, 19, 18, 22, 23, 20, 21, 13, 12, 16, 17, 14, 15,  7,  6, 10, 11,  8,  9}, \
+                             { 6,  7,  8,  9, 10, 11,  0,  1,  2,  3,  4,  5, 14, 15, 12, 13, 17, 16, 20, 21, 18, 19, 23, 22}, \
+                             { 7,  6, 10, 11,  8,  9,  1,  0,  4,  5,  2,  3, 20, 21, 18, 19, 23, 22, 14, 15, 12, 13, 17, 16}, \
+                             {12, 13, 14, 15, 16, 17,  2,  3,  0,  1,  5,  4,  8,  9,  6,  7, 11, 10, 22, 23, 19, 18, 21, 20}, \
+                             {18, 19, 20, 21, 22, 23,  4,  5,  1,  0,  3,  2, 10, 11,  7, 6,  9,  8,  16, 17, 13, 12, 15, 14}, \
+                             {13, 12, 16, 17, 14, 15,  3,  2,  5,  4,  0,  1, 22, 23, 19, 18, 21, 20,  8,  9,  6,  7, 11, 10}, \
+                             {19, 18, 22, 23, 20, 21,  5,  4,  3,  2,  1,  0, 16, 17, 13, 12, 15, 14, 10, 11,  7,  6,  9,  8}, \
+                             { 8,  9,  6,  7, 11, 10, 14, 15, 12, 13, 17, 16,  0,  1,  2,  3,  4,  5, 21, 20, 23, 22, 18, 19}, \
+                             {10, 11,  7,  6,  9,  8, 20, 21, 18, 19, 23, 22,  1,  0,  4,  5,  2,  3, 15, 14, 17, 16, 12, 13}, \
+                             {14, 15, 12, 13, 17, 16,  8,  9,  6,  7, 11, 10,  2,  3,  0,  1,  5,  4, 23, 22, 21, 20, 19, 18}, \
+                             {20, 21, 18, 19, 23, 22, 10, 11,  7,  6,  9,  8,  4,  5,  1,  0,  3,  2, 17, 16, 15, 14, 13, 12}, \
+                             {16, 17, 13, 12, 15, 14, 22, 23, 19, 18, 21, 20,  3,  2,  5,  4,  0,  1,  9,  8, 11, 10,  6,  7}, \
+                             {22, 23, 19, 18, 21, 20, 16, 17, 13, 12, 15, 14,  5,  4,  3,  2,  1,  0, 11, 10,  9,  8,  7,  6}, \
+                             { 9,  8, 11, 10,  6,  7, 15, 14, 17, 16, 12, 13, 21, 20, 23, 22, 18, 19,  0,  1,  2,  3,  4,  5}, \
+                             {11, 10,  9,  8,  7,  6, 21, 20, 23, 22, 18, 19, 15, 14, 17, 16, 12, 13,  1,  0,  4,  5,  2,  3}, \
+                             {15, 14, 17, 16, 12, 13,  9,  8, 11, 10,  6,  7, 23, 22, 21, 20, 19, 18,  2,  3,  0,  1,  5,  4}, \
+                             {21, 20, 23, 22, 18, 19, 11, 10,  9,  8,  7,  6, 17, 16, 15, 14, 13, 12,  4,  5,  1,  0,  3,  2}, \
+                             {17, 16, 15, 14, 13, 12, 23, 22, 21, 20, 19, 18,  9,  8, 11, 10,  6,  7,  3,  2,  5,  4,  0,  1}, \
+                             {23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0}};
+   int translator_cd[24] =   { 8, 11,  5, 10,  4,  7,  8, 11,  2,  9,  1,  6,  5, 10,  2,  9,  0,  3,  4,  7,  1,  6,  0,  3};
+   path_analysis_recursive_4d(n, shares, shares_cd, translator, translator_cd, 1, paths, 0, solution);
+}
+
+
 int main() {
    int d = 4;
    int n = 12;
-   int w = 1; // search width
+   int w = 13; // search width
    int share = pow(n, d) / factorial(d);
    // max order of magnitude
    double magnitude = 0;
    for (int i = 0; i < n; i++) {
       magnitude += pow(w, i);
    }
-   cout << magnitude << "\n";
+//   cout << magnitude << "\n";
    if (d == 3) {
       tuple<unsigned int, double> **** paths = new tuple<unsigned int, double> *** [n];
       path_maker_3d(n, paths);
@@ -545,10 +717,17 @@ int main() {
    } else if (d == 4) {
       tuple<unsigned int, unsigned int, double> ***** paths = new tuple<unsigned int, unsigned int, double> **** [n];
       path_maker_4d(n, paths);
+      //print_path_column_4d(n, 0, paths);
+      //print_path_column_4d(n, 1, paths);
+      //print_path_column_4d(n, 2, paths);
+      //print_path_column_4d(n, 3, paths);
+      //print_path_column_4d(n, 4, paths);
+      //print_path_column_4d(n, n - 1, paths);
       vector<string> solutions = path_finder_4d(n, share, w, paths);
       for (string solution: solutions) {
          cout << solution + "\n";
       }
+      path_analysis_4d(n, share, 1, paths, solutions[0]);
       //print_path_column_4d(n, 0, paths);
       //print_path_column_4d(n, 1, paths);
       //print_path_column_4d(n, n - 1, paths);
