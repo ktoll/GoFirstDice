@@ -697,7 +697,7 @@ void path_analysis_4d(int n, int share, int w, tuple<unsigned int, unsigned int,
 int main() {
    int d = 4;
    int n = 12;
-   int w = 13; // search width
+   int w = 24; // search width
    int share = pow(n, d) / factorial(d);
    // max order of magnitude
    double magnitude = 0;

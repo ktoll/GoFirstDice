@@ -1,0 +1,256 @@
+abcddcbacbdaadbcdbaccabddbaccabdcbaddabcabcddcba
+0 0 12 0 2 0 9 0 0 0 0 0 
+abcddcbacbdaadbcdbaccabddbaccabdcbaddabcabdccdba
+0 0 12 0 2 0 9 0 0 0 0 0 
+abcddcbacbdaadbcdbaccabddbaccabdcbdaadbcabcddcba
+0 0 12 0 2 0 9 0 0 0 0 0 
+abcddcbacbdaadbcdbaccabddbaccabdcbdaadbcabdccdba
+0 0 12 0 2 0 9 0 0 0 0 0 
+abcddcbacbdaadbcdbaccabddbcaacbdcbaddabcabcddcba
+0 0 12 0 2 0 12 0 0 0 0 0 
+abcddcbacbdaadbcdbaccabddbcaacbdcbaddabcabdccdba
+0 0 12 0 2 0 12 0 0 0 0 0 
+abcddcbacbdaadbcdbaccabddbcaacbdcbdaadbcabcddcba
+0 0 12 0 2 0 12 0 0 0 0 0 
+abcddcbacbdaadbcdbaccabddbcaacbdcbdaadbcabdccdba
+0 0 12 0 2 0 12 0 0 0 0 0 
+abcddcbacbdaadbcdbaccadbbdaccabdcbaddabcabcddcba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbaccadbbdaccabdcbaddabcabdccdba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbaccadbbdaccabdcbdaadbcabcddcba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbaccadbbdaccabdcbdaadbcabdccdba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbaccadbbdcaacbdcbaddabcabcddcba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbaccadbbdcaacbdcbaddabcabdccdba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbaccadbbdcaacbdcbdaadbcabcddcba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbaccadbbdcaacbdcbdaadbcabdccdba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacbddbaccabdcbaddabcabcddcba
+0 0 12 0 13 0 9 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacbddbaccabdcbaddabcabdccdba
+0 0 12 0 13 0 9 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacbddbaccabdcbdaadbcabcddcba
+0 0 12 0 13 0 9 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacbddbaccabdcbdaadbcabdccdba
+0 0 12 0 13 0 9 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacbddbcaacbdcbaddabcabcddcba
+0 0 12 0 13 0 12 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacbddbcaacbdcbaddabcabdccdba
+0 0 12 0 13 0 12 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacbddbcaacbdcbdaadbcabcddcba
+0 0 12 0 13 0 12 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacbddbcaacbdcbdaadbcabdccdba
+0 0 12 0 13 0 12 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacdbbdaccabdcbaddabcabcddcba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacdbbdaccabdcbaddabcabdccdba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacdbbdaccabdcbdaadbcabcddcba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacdbbdaccabdcbdaadbcabdccdba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacdbbdcaacbdcbaddabcabcddcba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacdbbdcaacbdcbaddabcabdccdba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacdbbdcaacbdcbdaadbcabcddcba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbacbdaadbcdbcaacdbbdcaacbdcbdaadbcabdccdba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbaddabccbaddabcdbaccabdabcddcba
+0 0 12 0 2 0 9 0 0 0 0 0 
+abcddcbadbcaacbdcbaddabccbaddabcdbaccabdabdccdba
+0 0 12 0 2 0 9 0 0 0 0 0 
+abcddcbadbcaacbdcbaddabccbaddabcdbcaacbdabcddcba
+0 0 12 0 2 0 9 0 0 0 0 0 
+abcddcbadbcaacbdcbaddabccbaddabcdbcaacbdabdccdba
+0 0 12 0 2 0 9 0 0 0 0 0 
+abcddcbadbcaacbdcbaddabccbdaadbcdbaccabdabcddcba
+0 0 12 0 2 0 12 0 0 0 0 0 
+abcddcbadbcaacbdcbaddabccbdaadbcdbaccabdabdccdba
+0 0 12 0 2 0 12 0 0 0 0 0 
+abcddcbadbcaacbdcbaddabccbdaadbcdbcaacbdabcddcba
+0 0 12 0 2 0 12 0 0 0 0 0 
+abcddcbadbcaacbdcbaddabccbdaadbcdbcaacbdabdccdba
+0 0 12 0 2 0 12 0 0 0 0 0 
+abcddcbadbcaacbdcbaddacbbcaddabcdbaccabdabcddcba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbaddacbbcaddabcdbaccabdabdccdba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbaddacbbcaddabcdbcaacbdabcddcba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbaddacbbcaddabcdbcaacbdabdccdba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbaddacbbcdaadbcdbaccabdabcddcba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbaddacbbcdaadbcdbaccabdabdccdba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbaddacbbcdaadbcdbcaacbdabcddcba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbaddacbbcdaadbcdbcaacbdabdccdba
+0 0 12 0 2 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadbccbaddabcdbaccabdabcddcba
+0 0 12 0 13 0 9 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadbccbaddabcdbaccabdabdccdba
+0 0 12 0 13 0 9 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadbccbaddabcdbcaacbdabcddcba
+0 0 12 0 13 0 9 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadbccbaddabcdbcaacbdabdccdba
+0 0 12 0 13 0 9 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadbccbdaadbcdbaccabdabcddcba
+0 0 12 0 13 0 12 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadbccbdaadbcdbaccabdabdccdba
+0 0 12 0 13 0 12 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadbccbdaadbcdbcaacbdabcddcba
+0 0 12 0 13 0 12 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadbccbdaadbcdbcaacbdabdccdba
+0 0 12 0 13 0 12 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadcbbcaddabcdbaccabdabcddcba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadcbbcaddabcdbaccabdabdccdba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadcbbcaddabcdbcaacbdabcddcba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadcbbcaddabcdbcaacbdabdccdba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadcbbcdaadbcdbaccabdabcddcba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadcbbcdaadbcdbaccabdabdccdba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadcbbcdaadbcdbcaacbdabcddcba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbadbcaacbdcbdaadcbbcdaadbcdbcaacbdabdccdba
+0 0 12 0 13 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbaccabddbaccabdcbaddabcabcddcba
+0 0 20 0 2 0 9 0 0 0 0 0 
+abcddcbacbaddabcdbaccabddbaccabdcbaddabcabdccdba
+0 0 20 0 2 0 9 0 0 0 0 0 
+abcddcbacbaddabcdbaccabddbaccabdcbdaadbcabcddcba
+0 0 20 0 2 0 9 0 0 0 0 0 
+abcddcbacbaddabcdbaccabddbaccabdcbdaadbcabdccdba
+0 0 20 0 2 0 9 0 0 0 0 0 
+abcddcbacbaddabcdbaccabddbcaacbdcbaddabcabcddcba
+0 0 20 0 2 0 12 0 0 0 0 0 
+abcddcbacbaddabcdbaccabddbcaacbdcbaddabcabdccdba
+0 0 20 0 2 0 12 0 0 0 0 0 
+abcddcbacbaddabcdbaccabddbcaacbdcbdaadbcabcddcba
+0 0 20 0 2 0 12 0 0 0 0 0 
+abcddcbacbaddabcdbaccabddbcaacbdcbdaadbcabdccdba
+0 0 20 0 2 0 12 0 0 0 0 0 
+abcddcbacbaddabcdbaccadbbdaccabdcbaddabcabcddcba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbaccadbbdaccabdcbaddabcabdccdba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbaccadbbdaccabdcbdaadbcabcddcba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbaccadbbdaccabdcbdaadbcabdccdba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbaccadbbdcaacbdcbaddabcabcddcba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbaccadbbdcaacbdcbaddabcabdccdba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbaccadbbdcaacbdcbdaadbcabcddcba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbaccadbbdcaacbdcbdaadbcabdccdba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbcaacbddbaccabdcbaddabcabcddcba
+0 0 20 0 13 0 9 0 0 0 0 0 
+abcddcbacbaddabcdbcaacbddbaccabdcbaddabcabdccdba
+0 0 20 0 13 0 9 0 0 0 0 0 
+abcddcbacbaddabcdbcaacbddbaccabdcbdaadbcabcddcba
+0 0 20 0 13 0 9 0 0 0 0 0 
+abcddcbacbaddabcdbcaacbddbaccabdcbdaadbcabdccdba
+0 0 20 0 13 0 9 0 0 0 0 0 
+abcddcbacbaddabcdbcaacbddbcaacbdcbaddabcabcddcba
+0 0 20 0 13 0 12 0 0 0 0 0 
+abcddcbacbaddabcdbcaacbddbcaacbdcbaddabcabdccdba
+0 0 20 0 13 0 12 0 0 0 0 0 
+abcddcbacbaddabcdbcaacbddbcaacbdcbdaadbcabcddcba
+0 0 20 0 13 0 12 0 0 0 0 0 
+abcddcbacbaddabcdbcaacbddbcaacbdcbdaadbcabdccdba
+0 0 20 0 13 0 12 0 0 0 0 0 
+abcddcbacbaddabcdbcaacdbbdaccabdcbaddabcabcddcba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbcaacdbbdaccabdcbaddabcabdccdba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbcaacdbbdaccabdcbdaadbcabcddcba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbcaacdbbdaccabdcbdaadbcabdccdba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbcaacdbbdcaacbdcbaddabcabcddcba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbcaacdbbdcaacbdcbaddabcabdccdba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbcaacdbbdcaacbdcbdaadbcabcddcba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbacbaddabcdbcaacdbbdcaacbdcbdaadbcabdccdba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbaddabccbaddabcdbaccabdabcddcba
+0 0 20 0 2 0 9 0 0 0 0 0 
+abcddcbadbaccabdcbaddabccbaddabcdbaccabdabdccdba
+0 0 20 0 2 0 9 0 0 0 0 0 
+abcddcbadbaccabdcbaddabccbaddabcdbcaacbdabcddcba
+0 0 20 0 2 0 9 0 0 0 0 0 
+abcddcbadbaccabdcbaddabccbaddabcdbcaacbdabdccdba
+0 0 20 0 2 0 9 0 0 0 0 0 
+abcddcbadbaccabdcbaddabccbdaadbcdbaccabdabcddcba
+0 0 20 0 2 0 12 0 0 0 0 0 
+abcddcbadbaccabdcbaddabccbdaadbcdbaccabdabdccdba
+0 0 20 0 2 0 12 0 0 0 0 0 
+abcddcbadbaccabdcbaddabccbdaadbcdbcaacbdabcddcba
+0 0 20 0 2 0 12 0 0 0 0 0 
+abcddcbadbaccabdcbaddabccbdaadbcdbcaacbdabdccdba
+0 0 20 0 2 0 12 0 0 0 0 0 
+abcddcbadbaccabdcbaddacbbcaddabcdbaccabdabcddcba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbaddacbbcaddabcdbaccabdabdccdba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbaddacbbcaddabcdbcaacbdabcddcba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbaddacbbcaddabcdbcaacbdabdccdba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbaddacbbcdaadbcdbaccabdabcddcba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbaddacbbcdaadbcdbaccabdabdccdba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbaddacbbcdaadbcdbcaacbdabcddcba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbaddacbbcdaadbcdbcaacbdabdccdba
+0 0 20 0 2 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbdaadbccbaddabcdbaccabdabcddcba
+0 0 20 0 13 0 9 0 0 0 0 0 
+abcddcbadbaccabdcbdaadbccbaddabcdbaccabdabdccdba
+0 0 20 0 13 0 9 0 0 0 0 0 
+abcddcbadbaccabdcbdaadbccbaddabcdbcaacbdabcddcba
+0 0 20 0 13 0 9 0 0 0 0 0 
+abcddcbadbaccabdcbdaadbccbaddabcdbcaacbdabdccdba
+0 0 20 0 13 0 9 0 0 0 0 0 
+abcddcbadbaccabdcbdaadbccbdaadbcdbaccabdabcddcba
+0 0 20 0 13 0 12 0 0 0 0 0 
+abcddcbadbaccabdcbdaadbccbdaadbcdbaccabdabdccdba
+0 0 20 0 13 0 12 0 0 0 0 0 
+abcddcbadbaccabdcbdaadbccbdaadbcdbcaacbdabcddcba
+0 0 20 0 13 0 12 0 0 0 0 0 
+abcddcbadbaccabdcbdaadbccbdaadbcdbcaacbdabdccdba
+0 0 20 0 13 0 12 0 0 0 0 0 
+abcddcbadbaccabdcbdaadcbbcaddabcdbaccabdabcddcba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbdaadcbbcaddabcdbaccabdabdccdba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbdaadcbbcaddabcdbcaacbdabcddcba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbdaadcbbcaddabcdbcaacbdabdccdba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbdaadcbbcdaadbcdbaccabdabcddcba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbdaadcbbcdaadbcdbaccabdabdccdba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbdaadcbbcdaadbcdbcaacbdabcddcba
+0 0 20 0 13 2 2 0 0 0 0 0 
+abcddcbadbaccabdcbdaadcbbcdaadbcdbcaacbdabdccdba
+0 0 20 0 13 2 2 0 0 0 0 0 
