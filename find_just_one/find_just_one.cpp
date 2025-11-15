@@ -534,11 +534,28 @@ vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsig
 
 
 // path search analysis
-int evaluate_distance(current_group, path, shares, shares_cd) {
+int evaluate_distance(int current_group, tuple<unsigned int, unsigned int, double> ***** paths, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int column) {
    int distance = 0;
-   double cmpval = get<2>(*path[shares[current_group]][shares_cd[translator_cd[current_group]]][translator[current_group][i]])
+   double cmpval = 0;
+   double cmpval2 = 0;
+   bool good = true;
+   for (int j = 0; j < 24; j++) {
+      if (paths[column][shares[j]][shares_cd[translator_cd[j]]][translator[j][current_group]]) {
+         cmpval += get<2>(*paths[column][shares[j]][shares_cd[translator_cd[j]]][translator[j][current_group]]);
+      }
+   }
    for (int i = 0; i < 24; i++) {
-      
+      cmpval2 = 0;
+      for (int j = 0; j < 24; j++) {
+         if (paths[column][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]) {
+            cmpval2 += get<2>(*paths[column][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
+         } else {
+            good = false;
+         }
+      }
+      if (good && (cmpval2 > cmpval) && (i != current_group)) {
+         distance++;
+      }
    }
    return distance;
 }
@@ -554,7 +571,7 @@ void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int transl
    //   cout << shares_cd[i] << " ";
    //}
    //cout << "\n";
-   //int current_group = -1;
+   int current_group = -1;
    for (int i = 0; i < 24; i++) {
       if (solution.substr(depth * 4, 4) == get_group_4d[i]) {
          current_group = i;
@@ -585,13 +602,13 @@ void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int transl
       maximum = 24;
    }
    for (int i = 0; i < maximum; i++) {
-      if (paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]) {
+      if (paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][translator[0][i]]) {
          bool good = true;
          int next_shares[24] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
          int next_shares_cd[12] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-         double combined_path_options = get<2>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
-         next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
-         next_shares_cd[translator_cd[0]] = get<1>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
+         double combined_path_options = get<2>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][translator[0][i]]);
+         next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][translator[0][i]]);
+         next_shares_cd[translator_cd[0]] = get<1>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][translator[0][i]]);
          for (int j = 1; j < 24; j++) {
             if (paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]) {
                next_shares[j] = get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
@@ -608,7 +625,6 @@ void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int transl
             }
          }
          if (good) {
-            cout << evaluate_distance(current_group, paths[n - depth - 1], shares, shares_cd) << " ";
             //cout << "option: " << get_group_4d[i] << " " << combined_path_options;
             //for (int g = 0; g < 24; g++) {
             //   cout << " " << get<0>(*paths[n - depth - 1][shares[g]][shares_cd[translator_cd[g]]][translator[g][i]]);
@@ -628,6 +644,7 @@ void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int transl
          }
       }
    }
+   cout << evaluate_distance(current_group, paths, shares, shares_cd, translator, translator_cd, n - depth - 1) << " ";
    for (int k = 0; k < w; k++) {
       if (depth == n - 1) {
       } else {
@@ -708,10 +725,12 @@ int main() {
       //print_path_column_4d(n, 4, paths);
       //print_path_column_4d(n, n - 1, paths);
       vector<string> solutions = path_finder_4d(n, share, w, paths);
+      //for (string solution: solutions) {
+      //   cout << solution + "\n";
+      //}
       for (string solution: solutions) {
-         cout << solution + "\n";
+         path_analysis_4d(n, share, 1, paths, solution);
       }
-      path_analysis_4d(n, share, 1, paths, solutions[0]);
       //print_path_column_4d(n, 0, paths);
       //print_path_column_4d(n, 1, paths);
       //print_path_column_4d(n, n - 1, paths);
