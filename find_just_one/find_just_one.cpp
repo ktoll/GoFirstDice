@@ -534,18 +534,27 @@ vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsig
 
 
 // path search analysis
-void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, tuple<unsigned int, unsigned int, double> ***** paths, int depth, string solution) {
-   cout << "depth " << depth << "\n";
-   cout << solution.substr(depth * 4, 4) << "\n";
+int evaluate_distance(current_group, path, shares, shares_cd) {
+   int distance = 0;
+   double cmpval = get<2>(*path[shares[current_group]][shares_cd[translator_cd[current_group]]][translator[current_group][i]])
    for (int i = 0; i < 24; i++) {
-      cout << shares[i] << " ";
+      
    }
-   cout << "\n";
-   for (int i = 0; i < 12; i++) {
-      cout << shares_cd[i] << " ";
-   }
-   cout << "\n";
-   int current_group = -1;
+   return distance;
+}
+
+void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, tuple<unsigned int, unsigned int, double> ***** paths, int depth, string solution) {
+   //cout << "depth " << depth << "\n";
+   //cout << solution.substr(depth * 4, 4) << "\n";
+   //for (int i = 0; i < 24; i++) {
+   //   cout << shares[i] << " ";
+   //}
+   //cout << "\n";
+   //for (int i = 0; i < 12; i++) {
+   //   cout << shares_cd[i] << " ";
+   //}
+   //cout << "\n";
+   //int current_group = -1;
    for (int i = 0; i < 24; i++) {
       if (solution.substr(depth * 4, 4) == get_group_4d[i]) {
          current_group = i;
@@ -599,12 +608,13 @@ void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int transl
             }
          }
          if (good) {
-            cout << "option: " << get_group_4d[i] << " " << combined_path_options;
-            for (int g = 0; g < 24; g++) {
-               cout << " " << get<2>(*paths[n - depth - 1][shares[g]][shares_cd[translator_cd[g]]][translator[g][i]]);
-            }
+            cout << evaluate_distance(current_group, paths[n - depth - 1], shares, shares_cd) << " ";
+            //cout << "option: " << get_group_4d[i] << " " << combined_path_options;
+            //for (int g = 0; g < 24; g++) {
+            //   cout << " " << get<0>(*paths[n - depth - 1][shares[g]][shares_cd[translator_cd[g]]][translator[g][i]]);
+            //}
             if (current_group == i) {
-               cout << " should pick!\n";
+               //cout << " should pick!\n";
                for (int m = 0; m < 24; m++) {
                   likeliests[0][m] = next_shares[m];
                }
@@ -612,36 +622,8 @@ void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int transl
                   likeliests_cd[0][m] = next_shares_cd[m];
                }
             }
-            else {
-               cout << "\n";
-            }
-            //int insertion_point = -1;
-            //for (int k = 0; k < w; k++) {
-            //   if (combined_path_options > likeliest_quantity[k]) {
-            //      if (insertion_point == -1) {
-            //         insertion_point = k;
-            //      }
-            //   }
-            //}
-            //if (insertion_point > -1) {
-            //   for (int k = w - 1; k > insertion_point; k--) {
-            //      for (int m = 0; m < 24; m++) {
-            //         likeliests[k][m] = likeliests[k - 1][m];
-            //      }
-            //      for (int m = 0; m < 12; m++) {
-            //         likeliests_cd[k][m] = likeliests_cd[k - 1][m];
-            //      }
-            //      likeliest_quantity[k] = likeliest_quantity[k - 1];
-            //      likeliest_group[k] = likeliest_group[k - 1];
-            //   }
-            //   for (int m = 0; m < 24; m++) {
-            //      likeliests[insertion_point][m] = next_shares[m];
-            //   }
-            //   for (int m = 0; m < 12; m++) {
-            //      likeliests_cd[insertion_point][m] = next_shares_cd[m];
-            //   }
-            //   likeliest_quantity[insertion_point] = combined_path_options;
-            //   likeliest_group[insertion_point] = get_group_4d[i];
+            //else {
+            //   cout << "\n";
             //}
          }
       }
@@ -655,6 +637,7 @@ void path_analysis_recursive_4d(int n, int shares[], int shares_cd[], int transl
 }
 
 void path_analysis_4d(int n, int share, int w, tuple<unsigned int, unsigned int, double> ***** paths, string solution) {
+   cout << solution << "\n";
    int share_cd = pow(n, 2) / factorial(2);
    int shares[24] = {share};
    for (int i = 0; i < 24; i++) {
@@ -690,6 +673,7 @@ void path_analysis_4d(int n, int share, int w, tuple<unsigned int, unsigned int,
                              {23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0}};
    int translator_cd[24] =   { 8, 11,  5, 10,  4,  7,  8, 11,  2,  9,  1,  6,  5, 10,  2,  9,  0,  3,  4,  7,  1,  6,  0,  3};
    path_analysis_recursive_4d(n, shares, shares_cd, translator, translator_cd, 1, paths, 0, solution);
+   cout << "\n";
 }
 
 
