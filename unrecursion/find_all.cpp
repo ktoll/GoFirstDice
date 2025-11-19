@@ -245,6 +245,53 @@ vector<string> path_finder_3d(int n, int share, int w, tuple<unsigned int, doubl
 
 
 // 4d ----------------------------------------------------------------------------------------------
+// between tuple struct map queue stuff
+typedef tuple<int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int> btw_4d_key_t; // 24 4 letter perms, 12 2 letter perms
+typedef deque<tuple<btw_4d_key_t, int>> btw_4d_data_t; // perms, then group
+
+// abcd abdc acbd acdb adbc adcb
+// bacd badc bcad bcda bdac bdca
+// cabd cadb cbad cbda cdab cdba
+// dabc dacb dbac dbca dcab dcba
+
+struct key_hash_4d : public unary_function<btw_4d_key_t, size_t> {
+   size_t operator()(const btw_4d_key_t& k) const {
+      return (get<24 + 0>(k) << 22) + (get<24 + 1>(k) << 21) + (get<24 + 2>(k) << 20) + (get<24 + 4>(k) << 19) + (get<24 + 5>(k) << 18) + (get<24 + 8>(k) << 18) + (get<0>(k) << 17) + (get<1>(k) << 16) + (get<2>(k) << 15) + (get<3>(k) << 14) + (get<4>(k) << 13) + (get<5>(k) << 12) + (get<6>(k) << 11) + (get<7>(k) << 10) + (get<8>(k) << 9) + (get<9>(k) << 8) + (get<10>(k) << 7) + (get<11>(k) << 6) + (get<12>(k) << 5) + (get<13>(k) << 4) + (get<14>(k) << 3) + (get<15>(k) << 2) + (get<16>(k) << 1) + get<17>(k);
+   }
+};
+
+struct key_equal_4d : public binary_function<btw_4d_key_t, btw_4d_key_t, size_t> {
+   bool operator()(const btw_4d_key_t& k0, const btw_4d_key_t& k1) const {
+      return (get<0>(k0) == get<0>(k1) &&
+              get<1>(k0) == get<1>(k1) &&
+              get<2>(k0) == get<2>(k1) &&
+              get<3>(k0) == get<3>(k1) &&
+              get<4>(k0) == get<4>(k1) &&
+              get<5>(k0) == get<5>(k1) &&
+              get<6>(k0) == get<6>(k1) &&
+              get<7>(k0) == get<7>(k1) &&
+              get<8>(k0) == get<8>(k1) &&
+              get<9>(k0) == get<9>(k1) &&
+              get<10>(k0) == get<10>(k1) &&
+              get<11>(k0) == get<11>(k1) &&
+              get<12>(k0) == get<12>(k1) &&
+              get<13>(k0) == get<13>(k1) &&
+              get<14>(k0) == get<14>(k1) &&
+              get<15>(k0) == get<15>(k1) &&
+              get<16>(k0) == get<16>(k1) &&
+              get<17>(k0) == get<17>(k1) &&
+              get<18>(k0) == get<18>(k1) &&
+              get<19>(k0) == get<19>(k1) &&
+              get<20>(k0) == get<20>(k1) &&
+              get<21>(k0) == get<21>(k1) &&
+              get<22>(k0) == get<22>(k1) &&
+              get<23>(k0) == get<23>(k1));
+   }
+};
+
+typedef unordered_map<const btw_4d_key_t, btw_4d_data_t, key_hash_4d, key_equal_4d> btw_4d_map_t;
+
+
 // path making
 void path_column_maker_4d(int group, int old_maximum, int old_maximum_cd, int maximum_cd, int num_abs, int add_cds, int addition, tuple<unsigned int, unsigned int, double> **** previous_path_column, tuple<unsigned int, unsigned int, double> **** current_path_column) {
    double num_options;
@@ -437,118 +484,210 @@ void print_path_column_4d(int n, int column, tuple<unsigned int, unsigned int, d
 
 
 // path searching
-vector<string> path_finder_recursive_4d(int n, int shares[], int shares_cd[], int translator[24][24], int translator_cd[], int w, tuple<unsigned int, unsigned int, double> ***** paths, int depth, string so_far) {
-//   cout << "depth " << depth << "\n";
-//   cout << so_far << "\n";
-//   for (int i = 0; i < 24; i++) {
-//      cout << shares[i] << " ";
-//   }
-//   cout << "\n";
-//   for (int i = 0; i < 12; i++) {
-//      cout << shares_cd[i] << " ";
-//   }
-//   cout << "\n";
-   vector<string> solutions = {};
+void path_finder_one_step_4d(int n, int translator[24][24], int translator_cd[24], tuple<unsigned int, unsigned int, double> ***** paths, int depth, btw_4d_key_t btw_key, btw_4d_map_t btw_map[]) {
    int maximum;
-   int likeliests[w][24] = {{-1}};
-   int likeliests_cd[w][12] = {{-1}};
-   double likeliest_quantity[w] = {0};
-   string likeliest_group[w] = {""};
-   for (int i = 0; i < w; i++) {
-      likeliest_quantity[i] = 0;
-      likeliest_group[i] = "";
-      for (int j = 0; j < 24; j++) {
-         likeliests[i][j] = -1;
-      }
-      for (int j = 0; j < 12; j++) {
-         likeliests_cd[i][j] = -1;
-      }
-   }
    if (depth == 0) {
       maximum = 1;
    } else {
       maximum = 24;
    }
-   for (int i = 0; i < maximum; i++) {
-      if (paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]) {
-         bool good = true;
-         int next_shares[24] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-         int next_shares_cd[12] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-         double combined_path_options = get<2>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
-         next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
-         next_shares_cd[translator_cd[0]] = get<1>(*paths[n - depth - 1][shares[0]][shares_cd[translator_cd[0]]][i]);
-         for (int j = 1; j < 24; j++) {
-            if (paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]) {
-               next_shares[j] = get<0>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
-               combined_path_options += get<2>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
-               if (next_shares_cd[translator_cd[j]] > -1) {
-                  if (next_shares_cd[translator_cd[j]] != get<1>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]])) {
-                     cout << "uh oh\n";
-                     good = false;
-                  }
-               }
-               next_shares_cd[translator_cd[j]] = get<1>(*paths[n - depth - 1][shares[j]][shares_cd[translator_cd[j]]][translator[j][i]]);
-            } else {
-               good = false;
-            }
+   for (int i = 0; i < maximum; i++) { // i is group we might assign
+      bool good = true;
+      int next_shares[36] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+      // paths[column][shares][group]
+      // j = 0
+      //cout << n - depth - 1 << " " << get<0>(btw_key) << " " << get<24 + 8>(btw_key) << " " << translator[0][i] << "\n";
+      //cout << "paths[n - depth - 1] = " << paths[n - depth - 1] << "\n";
+      //cout << "paths[n - depth - 1][get<0>(btw_key)] = " << paths[n - depth - 1][get<0>(btw_key)] << "\n";
+      //cout << "paths[n - depth - 1][get<0>(btw_key)][get<24 + 8>(btw_key)] = " << paths[n - depth - 1][get<0>(btw_key)][get<24 + 8>(btw_key)] << "\n";
+      //cout << "paths[n - depth - 1][get<0>(btw_key)][get<24 + 8>(btw_key)][translator[0][i]] = " << paths[n - depth - 1][get<0>(btw_key)][get<24 + 8>(btw_key)][translator[0][i]] << "\n";
+      if (paths[n - depth - 1][get<0>(btw_key)][get<24 + 8>(btw_key)][translator[0][i]]) {
+         next_shares[0] = get<0>(*paths[n - depth - 1][get<0>(btw_key)][get<24 + 8>(btw_key)][translator[0][i]]);
+         next_shares[24 + 8] = get<1>(*paths[n - depth - 1][get<0>(btw_key)][get<24 + 8>(btw_key)][translator[0][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<1>(btw_key)][get<24 + 11>(btw_key)][translator[1][i]]) {
+         next_shares[1] = get<0>(*paths[n - depth - 1][get<1>(btw_key)][get<24 + 11>(btw_key)][translator[1][i]]);
+         next_shares[24 + 11] = get<1>(*paths[n - depth - 1][get<1>(btw_key)][get<24 + 11>(btw_key)][translator[1][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<2>(btw_key)][get<24 + 5>(btw_key)][translator[2][i]]) {
+         next_shares[2] = get<0>(*paths[n - depth - 1][get<2>(btw_key)][get<24 + 5>(btw_key)][translator[2][i]]);
+         next_shares[24 + 5] = get<1>(*paths[n - depth - 1][get<2>(btw_key)][get<24 + 5>(btw_key)][translator[2][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<3>(btw_key)][get<24 + 10>(btw_key)][translator[3][i]]) {
+         next_shares[3] = get<0>(*paths[n - depth - 1][get<3>(btw_key)][get<24 + 10>(btw_key)][translator[3][i]]);
+         next_shares[24 + 10] = get<1>(*paths[n - depth - 1][get<3>(btw_key)][get<24 + 10>(btw_key)][translator[3][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<4>(btw_key)][get<24 + 4>(btw_key)][translator[4][i]]) {
+         next_shares[4] = get<0>(*paths[n - depth - 1][get<4>(btw_key)][get<24 + 4>(btw_key)][translator[4][i]]);
+         next_shares[24 + 4] = get<1>(*paths[n - depth - 1][get<4>(btw_key)][get<24 + 4>(btw_key)][translator[4][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<5>(btw_key)][get<24 + 7>(btw_key)][translator[5][i]]) {
+         next_shares[5] = get<0>(*paths[n - depth - 1][get<5>(btw_key)][get<24 + 7>(btw_key)][translator[5][i]]);
+         next_shares[24 + 7] = get<1>(*paths[n - depth - 1][get<5>(btw_key)][get<24 + 7>(btw_key)][translator[5][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<6>(btw_key)][get<24 + 8>(btw_key)][translator[6][i]]) {
+         next_shares[6] = get<0>(*paths[n - depth - 1][get<6>(btw_key)][get<24 + 8>(btw_key)][translator[6][i]]);
+         next_shares[24 + 8] = get<1>(*paths[n - depth - 1][get<6>(btw_key)][get<24 + 8>(btw_key)][translator[6][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<7>(btw_key)][get<24 + 11>(btw_key)][translator[7][i]]) {
+         next_shares[7] = get<0>(*paths[n - depth - 1][get<7>(btw_key)][get<24 + 11>(btw_key)][translator[7][i]]);
+         next_shares[24 + 11] = get<1>(*paths[n - depth - 1][get<7>(btw_key)][get<24 + 11>(btw_key)][translator[7][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<8>(btw_key)][get<24 + 2>(btw_key)][translator[8][i]]) {
+         next_shares[8] = get<0>(*paths[n - depth - 1][get<8>(btw_key)][get<24 + 2>(btw_key)][translator[8][i]]);
+         next_shares[24 + 2] = get<1>(*paths[n - depth - 1][get<8>(btw_key)][get<24 + 2>(btw_key)][translator[8][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<9>(btw_key)][get<24 + 9>(btw_key)][translator[9][i]]) {
+         next_shares[9] = get<0>(*paths[n - depth - 1][get<9>(btw_key)][get<24 + 9>(btw_key)][translator[9][i]]);
+         next_shares[24 + 9] = get<1>(*paths[n - depth - 1][get<9>(btw_key)][get<24 + 9>(btw_key)][translator[9][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<10>(btw_key)][get<24 + 1>(btw_key)][translator[10][i]]) {
+         next_shares[10] = get<0>(*paths[n - depth - 1][get<10>(btw_key)][get<24 + 1>(btw_key)][translator[10][i]]);
+         next_shares[24 + 1] = get<1>(*paths[n - depth - 1][get<10>(btw_key)][get<24 + 1>(btw_key)][translator[10][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<11>(btw_key)][get<24 + 6>(btw_key)][translator[11][i]]) {
+         next_shares[11] = get<0>(*paths[n - depth - 1][get<11>(btw_key)][get<24 + 6>(btw_key)][translator[11][i]]);
+         next_shares[24 + 6] = get<1>(*paths[n - depth - 1][get<11>(btw_key)][get<24 + 6>(btw_key)][translator[11][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<12>(btw_key)][get<24 + 5>(btw_key)][translator[12][i]]) {
+         next_shares[12] = get<0>(*paths[n - depth - 1][get<12>(btw_key)][get<24 + 5>(btw_key)][translator[12][i]]);
+         next_shares[24 + 5] = get<1>(*paths[n - depth - 1][get<12>(btw_key)][get<24 + 5>(btw_key)][translator[12][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<13>(btw_key)][get<24 + 10>(btw_key)][translator[13][i]]) {
+         next_shares[13] = get<0>(*paths[n - depth - 1][get<13>(btw_key)][get<24 + 10>(btw_key)][translator[13][i]]);
+         next_shares[24 + 10] = get<1>(*paths[n - depth - 1][get<13>(btw_key)][get<24 + 10>(btw_key)][translator[13][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<14>(btw_key)][get<24 + 2>(btw_key)][translator[14][i]]) {
+         next_shares[14] = get<0>(*paths[n - depth - 1][get<14>(btw_key)][get<24 + 2>(btw_key)][translator[14][i]]);
+         next_shares[24 + 2] = get<1>(*paths[n - depth - 1][get<14>(btw_key)][get<24 + 2>(btw_key)][translator[14][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<15>(btw_key)][get<24 + 9>(btw_key)][translator[15][i]]) {
+         next_shares[15] = get<0>(*paths[n - depth - 1][get<15>(btw_key)][get<24 + 9>(btw_key)][translator[15][i]]);
+         next_shares[24 + 9] = get<1>(*paths[n - depth - 1][get<15>(btw_key)][get<24 + 9>(btw_key)][translator[15][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<16>(btw_key)][get<24 + 0>(btw_key)][translator[16][i]]) {
+         next_shares[16] = get<0>(*paths[n - depth - 1][get<16>(btw_key)][get<24 + 0>(btw_key)][translator[16][i]]);
+         next_shares[24 + 0] = get<1>(*paths[n - depth - 1][get<16>(btw_key)][get<24 + 0>(btw_key)][translator[16][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<17>(btw_key)][get<24 + 3>(btw_key)][translator[17][i]]) {
+         next_shares[17] = get<0>(*paths[n - depth - 1][get<17>(btw_key)][get<24 + 3>(btw_key)][translator[17][i]]);
+         next_shares[24 + 3] = get<1>(*paths[n - depth - 1][get<17>(btw_key)][get<24 + 3>(btw_key)][translator[17][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<18>(btw_key)][get<24 + 4>(btw_key)][translator[18][i]]) {
+         next_shares[18] = get<0>(*paths[n - depth - 1][get<18>(btw_key)][get<24 + 4>(btw_key)][translator[18][i]]);
+         next_shares[24 + 4] = get<1>(*paths[n - depth - 1][get<18>(btw_key)][get<24 + 4>(btw_key)][translator[18][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<19>(btw_key)][get<24 + 7>(btw_key)][translator[19][i]]) {
+         next_shares[19] = get<0>(*paths[n - depth - 1][get<19>(btw_key)][get<24 + 7>(btw_key)][translator[19][i]]);
+         next_shares[24 + 7] = get<1>(*paths[n - depth - 1][get<19>(btw_key)][get<24 + 7>(btw_key)][translator[19][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<20>(btw_key)][get<24 + 1>(btw_key)][translator[20][i]]) {
+         next_shares[20] = get<0>(*paths[n - depth - 1][get<20>(btw_key)][get<24 + 1>(btw_key)][translator[20][i]]);
+         next_shares[24 + 1] = get<1>(*paths[n - depth - 1][get<20>(btw_key)][get<24 + 1>(btw_key)][translator[20][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<21>(btw_key)][get<24 + 6>(btw_key)][translator[21][i]]) {
+         next_shares[21] = get<0>(*paths[n - depth - 1][get<21>(btw_key)][get<24 + 6>(btw_key)][translator[21][i]]);
+         next_shares[24 + 6] = get<1>(*paths[n - depth - 1][get<21>(btw_key)][get<24 + 6>(btw_key)][translator[21][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<22>(btw_key)][get<24 + 0>(btw_key)][translator[22][i]]) {
+         next_shares[22] = get<0>(*paths[n - depth - 1][get<22>(btw_key)][get<24 + 0>(btw_key)][translator[22][i]]);
+         next_shares[24 + 0] = get<1>(*paths[n - depth - 1][get<22>(btw_key)][get<24 + 0>(btw_key)][translator[22][i]]);
+      } else {
+         good = false;
+      }
+      if (paths[n - depth - 1][get<23>(btw_key)][get<24 + 3>(btw_key)][translator[23][i]]) {
+         next_shares[23] = get<0>(*paths[n - depth - 1][get<23>(btw_key)][get<24 + 3>(btw_key)][translator[23][i]]);
+         next_shares[24 + 3] = get<1>(*paths[n - depth - 1][get<23>(btw_key)][get<24 + 3>(btw_key)][translator[23][i]]);
+      } else {
+         good = false;
+      }
+      if (good) {
+         btw_4d_key_t next_key = make_tuple(next_shares[0], next_shares[1], next_shares[2], next_shares[3], next_shares[4], next_shares[5], next_shares[6], next_shares[7], next_shares[8], next_shares[9], next_shares[10], next_shares[11], next_shares[12], next_shares[13], next_shares[14], next_shares[15], next_shares[16], next_shares[17], next_shares[18], next_shares[19], next_shares[20], next_shares[21], next_shares[22], next_shares[23], next_shares[24], next_shares[25], next_shares[26], next_shares[27], next_shares[28], next_shares[29], next_shares[30], next_shares[31], next_shares[32], next_shares[33], next_shares[34], next_shares[35]);
+         tuple<btw_4d_key_t, int> prev_val = make_tuple(btw_key, i);
+         if (btw_map[n - depth - 1].find(next_key) == btw_map[n - depth - 1].end()) {
+            btw_map[n - depth - 1][next_key] = {};
          }
-         if (good) {
-//            cout << "option: " << get_group_4d[i] << " " << combined_path_options << "\n";
-            int insertion_point = -1;
-            for (int k = 0; k < w; k++) {
-               if (combined_path_options > likeliest_quantity[k]) {
-                  if (insertion_point == -1) {
-                     insertion_point = k;
-                  }
-               }
-            }
-            if (insertion_point > -1) {
-               for (int k = w - 1; k > insertion_point; k--) {
-                  for (int m = 0; m < 24; m++) {
-                     likeliests[k][m] = likeliests[k - 1][m];
-                  }
-                  for (int m = 0; m < 12; m++) {
-                     likeliests_cd[k][m] = likeliests_cd[k - 1][m];
-                  }
-                  likeliest_quantity[k] = likeliest_quantity[k - 1];
-                  likeliest_group[k] = likeliest_group[k - 1];
-               }
-               for (int m = 0; m < 24; m++) {
-                  likeliests[insertion_point][m] = next_shares[m];
-               }
-               for (int m = 0; m < 12; m++) {
-                  likeliests_cd[insertion_point][m] = next_shares_cd[m];
-               }
-               likeliest_quantity[insertion_point] = combined_path_options;
-               likeliest_group[insertion_point] = get_group_4d[i];
-            }
-         }
+         btw_map[n - depth - 1][next_key].push_back(prev_val);
       }
    }
-   for (int k = 0; k < w; k++) {
-      if (likeliest_quantity[k] > 0) {
-         if (depth == n - 1) {
-            solutions.push_back(so_far + likeliest_group[k]);
-         } else {
-            vector<string> more_solutions = path_finder_recursive_4d(n, likeliests[k], likeliests_cd[k], translator, translator_cd, w, paths, depth + 1, so_far + likeliest_group[k]);
+}
+
+void path_finder_unrecursive_4d(int n, int translator[24][24], int translator_cd[24], tuple<unsigned int, unsigned int, double> ***** paths, int depth, btw_4d_map_t btw_map[]) {
+   cout << depth << "\n";
+   btw_map[n - depth - 1] = {};
+   if (depth == 0) {
+      int share = pow(n, 4) / 24;
+      int share_cd = pow(n, 2) / 2;
+      btw_4d_key_t shares = make_tuple(share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd, share_cd);
+      path_finder_one_step_4d(n, translator, translator_cd, paths, depth, shares, btw_map);
+      cout << 1 << "\n";
+   }
+   else {
+      for (auto kv : btw_map[n - depth]) {
+         path_finder_one_step_4d(n, translator, translator_cd, paths, depth, kv.first, btw_map);
+      }
+      cout << btw_map[n - depth - 1].size() << "\n";
+   }
+}
+
+vector<string> path_finder_recursive_4d(int n, btw_4d_key_t btw_key, btw_4d_map_t btw_map[], int depth, string so_far) {
+   vector<string> solutions = {};
+   for (auto d : btw_map[depth][btw_key]) {
+      if (depth < n - 1) {
+            vector<string> more_solutions = path_finder_recursive_4d(n, get<0>(d), btw_map, depth + 1, get_group_4d[get<1>(d)] + so_far);
             solutions.insert(solutions.end(), more_solutions.begin(), more_solutions.end());
-         }
+      } else {
+         solutions.push_back(get_group_4d[get<1>(d)] + so_far);
       }
    }
-//   cout << likeliest_quantity[0] << "\n";
-   return solutions; 
+   return solutions;
 }
 
 vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsigned int, double> ***** paths) {
-   int share_cd = pow(n, 2) / factorial(2);
-   int shares[24] = {share};
-   for (int i = 0; i < 24; i++) {
-      shares[i] = share;
-   }
-   int shares_cd[12] = {share_cd};
-   for (int i = 0; i < 12; i++) {
-      shares_cd[i] = share_cd;
-   }
    int translator[24][24] = {{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}, \
                              { 1,  0,  4,  5,  2,  3,  7,  6, 10, 11,  8,  9, 18, 19, 20, 21, 22, 23, 12, 13, 14, 15, 16, 17}, \
                              { 2,  3,  0,  1,  5,  4, 12, 13, 14, 15, 16, 17,  6,  7,  8,  9, 10, 11, 19, 18, 22, 23, 20, 21}, \
@@ -574,7 +713,11 @@ vector<string> path_finder_4d(int n, int share, int w, tuple<unsigned int, unsig
                              {17, 16, 15, 14, 13, 12, 23, 22, 21, 20, 19, 18,  9,  8, 11, 10,  6,  7,  3,  2,  5,  4,  0,  1}, \
                              {23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0}};
    int translator_cd[24] =   { 8, 11,  5, 10,  4,  7,  8, 11,  2,  9,  1,  6,  5, 10,  2,  9,  0,  3,  4,  7,  1,  6,  0,  3};
-   return path_finder_recursive_4d(n, shares, shares_cd, translator, translator_cd, w, paths, 0, "");
+   btw_4d_map_t btw_map[n];
+   for (int i = 0; i < n; i++) {
+      path_finder_unrecursive_4d(n, translator, translator_cd, paths, i, btw_map);
+   }
+   return path_finder_recursive_4d(n, make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), btw_map, 0, "");
 }
 
 
@@ -740,9 +883,9 @@ void path_analysis_4d(int n, int share, int w, tuple<unsigned int, unsigned int,
 
 
 int main() {
-   int d = 3;
+   int d = 4;
    int n = 12;
-   int w = 6; // search width
+   int w = 24; // search width
    int share = pow(n, d) / factorial(d);
    // max order of magnitude
    double magnitude = 0;
