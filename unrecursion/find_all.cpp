@@ -202,16 +202,19 @@ void path_finder_one_step_3d(int n, int translator[6][6], tuple<unsigned int, do
 }
 
 void path_finder_unrecursive_3d(int n, int translator[6][6], tuple<unsigned int, double> **** paths, int depth, btw_3d_map_t btw_map[]) {
+   cout << depth << "\n";
    btw_map[n - depth - 1] = {};
    if (depth == 0) {
       int share = pow(n, 3) / 6;
       btw_3d_key_t shares = make_tuple(share, share, share, share, share, share);
       path_finder_one_step_3d(n, translator, paths, depth, shares, btw_map);
+      cout << 1 << "\n";
    }
    else {
       for (auto kv : btw_map[n - depth]) {
          path_finder_one_step_3d(n, translator, paths, depth, kv.first, btw_map);
       }
+      cout << btw_map[n - depth - 1].size() << "\n";
    }
 }
 
@@ -244,19 +247,126 @@ vector<string> path_finder_3d(int n, int share, int w, tuple<unsigned int, doubl
 }
 
 
+// path search analysis
+int evaluate_distance_3d(int current_group, tuple<unsigned int, double> **** paths, int shares[], int translator[6][6], int column) {
+   int distance = 0;
+   double cmpval = 0;
+   double cmpval2 = 0;
+   bool good = true;
+   for (int j = 0; j < 6; j++) {
+      if (paths[column][shares[j]][translator[j][current_group]]) {
+         cmpval += get<1>(*paths[column][shares[j]][translator[j][current_group]]);
+      }
+   }
+   for (int i = 0; i < 6; i++) {
+      cmpval2 = 0;
+      for (int j = 0; j < 6; j++) {
+         if (paths[column][shares[j]][translator[j][i]]) {
+            cmpval2 += get<1>(*paths[column][shares[j]][translator[j][i]]);
+         } else {
+            good = false;
+         }
+      }
+      if (good && (cmpval2 > cmpval) && (i != current_group)) {
+         distance++;
+      }
+   }
+   return distance;
+}
+
+void path_analysis_recursive_3d(int n, int shares[], int translator[6][6], int w, tuple<unsigned int, double> **** paths, int depth, string solution) {
+   int current_group = -1;
+   for (int i = 0; i < 6; i++) {
+      if (solution.substr(depth * 3, 3) == get_group_3d[i]) {
+         current_group = i;
+      }
+   }
+   if (current_group < 0) {
+      cout << "oh nooo\n";
+      return;
+   }
+   int maximum;
+   int likeliests[w][6] = {{-1}};
+   double likeliest_quantity[w] = {0};
+   string likeliest_group[w] = {""};
+   for (int i = 0; i < w; i++) {
+      likeliest_quantity[i] = 0;
+      likeliest_group[i] = "";
+      for (int j = 0; j < 6; j++) {
+         likeliests[i][j] = -1;
+      }
+   }
+   if (depth == 0) {
+      maximum = 1;
+   } else {
+      maximum = 6;
+   }
+   for (int i = 0; i < maximum; i++) {
+      if (paths[n - depth - 1][shares[0]][translator[0][i]]) {
+         bool good = true;
+         int next_shares[6] = {-1, -1, -1, -1, -1, -1};
+         double combined_path_options = get<1>(*paths[n - depth - 1][shares[0]][translator[0][i]]);
+         next_shares[0] = get<0>(*paths[n - depth - 1][shares[0]][translator[0][i]]);
+         for (int j = 1; j < 6; j++) {
+            if (paths[n - depth - 1][shares[j]][translator[j][i]]) {
+               next_shares[j] = get<0>(*paths[n - depth - 1][shares[j]][translator[j][i]]);
+               combined_path_options += get<1>(*paths[n - depth - 1][shares[j]][translator[j][i]]);
+            } else {
+               good = false;
+            }
+         }
+         if (good) {
+            if (current_group == i) {
+               for (int m = 0; m < 6; m++) {
+                  likeliests[0][m] = next_shares[m];
+               }
+            }
+         }
+      }
+   }
+   cout << evaluate_distance_3d(current_group, paths, shares, translator, n - depth - 1) << " ";
+   for (int k = 0; k < w; k++) {
+      if (depth == n - 1) {
+      } else {
+         path_analysis_recursive_3d(n, likeliests[k], translator, w, paths, depth + 1, solution);
+      }
+   }
+}
+
+void path_analysis_3d(int n, int share, int w, tuple<unsigned int, double> **** paths, string solution) {
+   cout << solution << "\n";
+   int shares[6] = {share};
+   for (int i = 0; i < 6; i++) {
+      shares[i] = share;
+   }
+   int translator[6][6] = {{0, 1, 2, 3, 4, 5}, \
+                           {1, 0, 4, 5, 2, 3}, \
+                           {2, 3, 0, 1, 5, 4}, \
+                           {4, 5, 1, 0, 3, 2}, \
+                           {3, 2, 5, 4, 0, 1}, \
+                           {5, 4, 3, 2, 1, 0}};
+   path_analysis_recursive_3d(n, shares, translator, 1, paths, 0, solution);
+   cout << "\n";
+}
+
+
 // 4d ----------------------------------------------------------------------------------------------
 // between tuple struct map queue stuff
 typedef tuple<int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int> btw_4d_key_t; // 24 4 letter perms, 12 2 letter perms
 typedef deque<tuple<btw_4d_key_t, int>> btw_4d_data_t; // perms, then group
 
+// ab ac ad ba bc bd ca cb cd da db dc
+// ab ac ad    bc bd       cd
+
 // abcd abdc acbd acdb adbc adcb
 // bacd badc bcad bcda bdac bdca
 // cabd cadb cbad cbda cdab cdba
+
 // dabc dacb dbac dbca dcab dcba
 
 struct key_hash_4d : public unary_function<btw_4d_key_t, size_t> {
    size_t operator()(const btw_4d_key_t& k) const {
-      return (get<24 + 0>(k) << 22) + (get<24 + 1>(k) << 21) + (get<24 + 2>(k) << 20) + (get<24 + 4>(k) << 19) + (get<24 + 5>(k) << 18) + (get<24 + 8>(k) << 18) + (get<0>(k) << 17) + (get<1>(k) << 16) + (get<2>(k) << 15) + (get<3>(k) << 14) + (get<4>(k) << 13) + (get<5>(k) << 12) + (get<6>(k) << 11) + (get<7>(k) << 10) + (get<8>(k) << 9) + (get<9>(k) << 8) + (get<10>(k) << 7) + (get<11>(k) << 6) + (get<12>(k) << 5) + (get<13>(k) << 4) + (get<14>(k) << 3) + (get<15>(k) << 2) + (get<16>(k) << 1) + get<17>(k);
+      return (get<0>(k) << 23) + (get<1>(k) << 22) + (get<2>(k) << 21) + (get<3>(k) << 20) + (get<4>(k) << 19) + (get<5>(k) << 18) + (get<6>(k) << 17) + (get<7>(k) << 16) + (get<8>(k) << 15) + (get<9>(k) << 14) + (get<10>(k) << 13) + (get<11>(k) << 12) + (get<12>(k) << 11) + (get<13>(k) << 10) + (get<14>(k) << 9) + (get<15>(k) << 8) + (get<16>(k) << 7) + (get<17>(k) << 6) + (get<24 + 0>(k) << 5) + (get<24 + 1>(k) << 4) + (get<24 + 2>(k) << 3) + (get<24 + 4>(k) << 2) + (get<24 + 5>(k) << 1) + get<24 + 8>(k);
    }
 };
 
@@ -883,9 +993,9 @@ void path_analysis_4d(int n, int share, int w, tuple<unsigned int, unsigned int,
 
 
 int main() {
-   int d = 4;
-   int n = 12;
-   int w = 24; // search width
+   int d = 3;
+   int n = 24;
+   int w = 6; // search width
    int share = pow(n, d) / factorial(d);
    // max order of magnitude
    double magnitude = 0;
@@ -897,9 +1007,13 @@ int main() {
       tuple<unsigned int, double> **** paths = new tuple<unsigned int, double> *** [n];
       path_maker_3d(n, paths);
       vector<string> solutions = path_finder_3d(n, share, w, paths);
-      for (string solution: solutions) {
-         cout << solution + "\n";
-      }
+      //for (string solution: solutions) {
+      //   cout << solution + "\n";
+      //}
+      cout << "num solutions: " << solutions.size() << "\n";
+      //for (string solution: solutions) {
+      //   path_analysis_3d(n, share, 1, paths, solution);
+      //}
       //print_path_column_3d(n, 0, paths);
       //print_path_column_3d(n, 1, paths);
       //print_path_column_3d(n, n - 1, paths);
@@ -916,9 +1030,10 @@ int main() {
       //for (string solution: solutions) {
       //   cout << solution + "\n";
       //}
-      for (string solution: solutions) {
-         path_analysis_4d(n, share, 1, paths, solution);
-      }
+      cout << "num solutions: " << solutions.size() << "\n";
+      //for (string solution: solutions) {
+      //   path_analysis_4d(n, share, 1, paths, solution);
+      //}
       //print_path_column_4d(n, 0, paths);
       //print_path_column_4d(n, 1, paths);
       //print_path_column_4d(n, n - 1, paths);
