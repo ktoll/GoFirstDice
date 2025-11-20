@@ -189,7 +189,11 @@ void path_finder_3d() {
          }
       }
    }
-   //printing
+}
+
+
+// path search printing
+void print_path_search_3d() {
    for (int between = 0; between < HALF_COLS; between++) {
       cout << "between columns " << between << " and " << between + 1 << " has " << btw_map[between].size() << "\n";
    }
@@ -211,4 +215,5 @@ int main() {
    path_maker_3d();
    print_path_3d();
    path_finder_3d();
+   print_path_search_3d();
 }
