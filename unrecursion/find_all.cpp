@@ -20,6 +20,12 @@ static string get_group_4d[24] = {"abcd", "abdc", "acbd", "acdb", "adbc", "adcb"
    #define HALF_COLS (N / 2)
    #define MAX_SHARE 16
    #define NUM_SHARES (MAX_SHARE + 1)
+   int translator[6][6] = {{5, 3, 4, 1, 2, 0}, //from is abc, to is first index, perm is second index. result is perm.
+                           {3, 5, 2, 0, 4, 1},
+                           {4, 1, 5, 3, 0, 2},
+                           {1, 4, 0, 2, 5, 3},
+                           {2, 0, 3, 5, 1, 4},
+                           {0, 2, 1, 4, 3, 5}};
 #endif
 
 
@@ -143,12 +149,6 @@ void path_finder_3d() {
                                    {1, 0, 2, 3, 2, 1},
                                    {2, 1, 0, 1, 3, 2},
                                    {0, 1, 2, 1, 2, 3}};
-   int translator[6][6] = {{5, 3, 4, 1, 2, 0}, //from is abc, to is first index, perm is second index. result is perm.
-                           {3, 5, 2, 0, 4, 1},
-                           {4, 1, 5, 3, 0, 2},
-                           {1, 4, 0, 2, 5, 3},
-                           {2, 0, 3, 5, 1, 4},
-                           {0, 2, 1, 4, 3, 5}};
    btw_map[0][make_tuple(N, N - 1, 0, N - 1, 0, 0)].push_back(make_tuple(make_tuple(0, 0, 0, 0, 0, 0), 0));
    for (int between = 1; between < HALF_COLS; between++) {
       for (auto kv : btw_map[between - 1]) {
@@ -195,7 +195,6 @@ void path_finder_3d() {
          }
       }
    }
-   
 }
 
 
@@ -221,9 +220,49 @@ void print_path_search_3d() {
 }
 
 
+// answer printing
+vector<string> recursive_print_answers_3d(int depth, btw_3d_key_t base, string so_far, int translation) {
+   vector<string> solutions = {};
+   if (depth == -1) {
+      solutions.push_back(so_far);
+   }
+   else {
+      for (auto qp : btw_map[depth][base]) {
+         vector<string> more_solutions;
+         if (translation < 0) {
+            more_solutions = recursive_print_answers_3d(depth - 1, get<0>(qp), get_group_3d[get<1>(qp)] + so_far, translation);
+         }
+         else {
+            more_solutions = recursive_print_answers_3d(depth - 1, get<0>(qp), so_far + get_group_3d[translator[translation][get<1>(qp)]], translation);
+         }
+         solutions.insert(solutions.end(), more_solutions.begin(), more_solutions.end());
+      }
+   }
+   return solutions;
+}
+
+void print_answers_3d() {
+   btw_3d_key_t front_base;
+   int groups[N];
+   for (auto meeting : joining) {
+      front_base = meeting.first;
+      vector<string> front_solutions = recursive_print_answers_3d(HALF_COLS - 1, front_base, "", -1);
+      for (auto shuffle_qp : meeting.second) {
+         vector<string> back_solutions = recursive_print_answers_3d(HALF_COLS - 1, get<0>(shuffle_qp), "", get<1>(shuffle_qp));
+         for (auto fs : front_solutions) {
+            for (auto bs : back_solutions) {
+               cout << fs << bs << "\n";
+            }
+         }
+      }
+   }
+}
+
+
 int main() {
    path_maker_3d();
    print_path_3d();
    path_finder_3d();
    print_path_search_3d();
+   print_answers_3d();
 }
