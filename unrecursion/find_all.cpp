@@ -7,7 +7,7 @@
 #include <deque>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24
-#define SEARCH_3d24
+#define SEARCH_3d12
 
 using namespace std;
 
@@ -74,12 +74,14 @@ struct key_equal : public binary_function<btw_3d_key_t, btw_3d_key_t, size_t> {
 };
 
 typedef unordered_map<const btw_3d_key_t, btw_3d_data_t, key_hash, key_equal> btw_3d_map_t;
+typedef unordered_map<const btw_3d_key_t, unordered_map<int, btw_3d_key_t>, key_hash, key_equal> btw_3d_map_sols_t;
 
 
 // global variables
 int paths[HALF_COLS][NUM_SHARES][4];
 btw_3d_map_t btw_map[HALF_COLS];
 btw_3d_map_t joining;
+btw_3d_map_sols_t btw_map_solutions[HALF_COLS - 1];
 
 
 // path making
@@ -174,6 +176,7 @@ void path_finder_3d() {
    btw_map[0][make_tuple(N, N - 1, 0, N - 1, 0, 0)].push_back(make_tuple(make_tuple(0, 0, 0, 0, 0, 0), 0));
    for (int between = 1; between < HALF_COLS; between++) {
       for (auto kv : btw_map[between - 1]) {
+         // ^should be able to parallelize this for loop
          for (int group = 0; group < 6; group++) {
             if ((paths[between][get<0>(kv.first)][group_to_grouptype[group][0]] > -1) &&
                 (paths[between][get<1>(kv.first)][group_to_grouptype[group][1]] > -1) &&
@@ -193,6 +196,7 @@ void path_finder_3d() {
    }
    int current_flipped[6];
    for (auto kv : btw_map[HALF_COLS - 1]) {
+      // ^should be able to parallelize this for loop
       current_flipped[0] = MAX_SHARE - get<0>(kv.first);
       current_flipped[1] = MAX_SHARE - get<1>(kv.first);
       current_flipped[2] = MAX_SHARE - get<2>(kv.first);
@@ -215,25 +219,28 @@ void path_finder_3d() {
 
 
 // path search printing
-void print_path_search_3d() {
+void print_path_search_3d(bool only_count) {
    cout << "\n";
    for (int between = 0; between < HALF_COLS; between++) {
       cout << "between columns " << between << " and " << between + 1 << " has " << btw_map[between].size() << "\n";
    }
    cout << "joining has " << joining.size() << "\n\n";
-   //for (int between = 0; between < HALF_COLS; between++) {
-   //   for (auto kv : btw_map[between]) {
-   //      cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
-   //   }
-   //   cout << "\n\n";
-   //}
-   //for (auto kv : joining) {
-   //   cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") \n";
-   //   for (auto kg : kv.second) {
-   //      cout << "  " << get<1>(kg) << " (" << get<0>(get<0>(kg)) << ","  << get<1>(get<0>(kg)) << ","  << get<2>(get<0>(kg)) << ","  << get<3>(get<0>(kg)) << ","  << get<4>(get<0>(kg)) << ","  << get<5>(get<0>(kg)) << ") \n";
-   //   }
-   //}
-   //cout << "\n";
+
+   if (!only_count) {
+      for (int between = 0; between < HALF_COLS; between++) {
+         for (auto kv : btw_map[between]) {
+            cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
+         }
+         cout << "\n\n";
+      }
+      for (auto kv : joining) {
+         cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") \n";
+         for (auto kg : kv.second) {
+            cout << "  " << get<1>(kg) << " (" << get<0>(get<0>(kg)) << ","  << get<1>(get<0>(kg)) << ","  << get<2>(get<0>(kg)) << ","  << get<3>(get<0>(kg)) << ","  << get<4>(get<0>(kg)) << ","  << get<5>(get<0>(kg)) << ") \n";
+         }
+      }
+      cout << "\n";
+   }
 }
 
 
@@ -263,6 +270,7 @@ void print_answers_3d(bool only_count) {
    int groups[N];
    int count = 0;
    for (auto meeting : joining) {
+      // ^should be able to parallelize this for loop
       front_base = meeting.first;
       vector<string> front_solutions = recursive_print_answers_3d(HALF_COLS - 1, front_base, "", -1);
       for (auto shuffle_qp : meeting.second) {
@@ -277,16 +285,58 @@ void print_answers_3d(bool only_count) {
          count += front_solutions.size() * back_solutions.size();
       }
    }
-   cout << "Total solutions: " << count << "\n";
+   cout << "Total 3d" << N << " solutions: " << count << "\n";
+}
+
+
+// making answer tree
+void make_answer_tree_3d() {
+   for (auto kv : joining) {
+      for (auto kg : btw_map[HALF_COLS - 1][kv.first]) {
+         btw_map_solutions[HALF_COLS - 2][get<0>(kg)][get<1>(kg)] = kv.first;
+      }
+   }
+   for (int between = HALF_COLS - 3; between >= 0; between--) {
+      for (auto kv : btw_map_solutions[between + 1]) {
+         for (auto kg : btw_map[between + 1][kv.first]) {
+            btw_map_solutions[between][get<0>(kg)][get<1>(kg)] = kv.first;
+         }
+      }
+   }
+}
+
+
+// print answer tree
+void print_answer_tree_3d(bool only_count) {
+   cout << "\nanswer tree:\n";
+   for (int between = 0; between < HALF_COLS - 1; between++) {
+      cout << "between columns " << between << " and " << between + 1 << " has " << btw_map_solutions[between].size() << "\n";
+   }
+   cout << "joining has " << joining.size() << "\n\n";
+
+   if (!only_count) {
+      for (int between = 0; between < HALF_COLS - 1; between++) {
+         for (auto kv : btw_map_solutions[between]) {
+            cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
+         }
+         cout << "\n\n";
+      }
+      for (auto kv : joining) {
+         cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ")  ";
+      }
+      cout << "\n\n";
+   }
 }
 
 
 int main() {
    #ifdef THREE_D
       path_maker_3d();
-      //print_path_3d();
+      print_path_3d();
       path_finder_3d();
-      //print_path_search_3d();
-      print_answers_3d(true);
+      print_path_search_3d(true); // true for just number of solutions
+      print_answers_3d(true); // true for just number of solutions
+      make_answer_tree_3d();
+      print_answer_tree_3d(true); // true for just search width
    #endif
 }
