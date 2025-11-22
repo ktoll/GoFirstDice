@@ -6,8 +6,8 @@
 #include <unordered_map>
 #include <deque>
 
-// Options: SEARCH_3d6
-#define SEARCH_3d6
+// Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24
+#define SEARCH_3d24
 
 using namespace std;
 
@@ -16,9 +16,31 @@ static string get_group_4d[24] = {"abcd", "abdc", "acbd", "acdb", "adbc", "adcb"
 
 
 #ifdef SEARCH_3d6
+   #define THREE_D
    #define N 6
-   #define HALF_COLS (N / 2)
    #define MAX_SHARE 16
+#endif
+
+#ifdef SEARCH_3d12
+   #define THREE_D
+   #define N 12
+   #define MAX_SHARE 68
+#endif
+
+#ifdef SEARCH_3d18
+   #define THREE_D
+   #define N 18
+   #define MAX_SHARE 156
+#endif
+
+#ifdef SEARCH_3d24
+   #define THREE_D
+   #define N 24
+   #define MAX_SHARE 280
+#endif
+
+#ifdef THREE_D
+   #define HALF_COLS (N / 2)
    #define NUM_SHARES (MAX_SHARE + 1)
    int translator[6][6] = {{5, 3, 4, 1, 2, 0}, //from is abc, to is first index, perm is second index. result is perm.
                            {3, 5, 2, 0, 4, 1},
@@ -129,15 +151,15 @@ void print_path_3d() {
       }
       cout << "\n";
    }
-   for (int between = 0; between < HALF_COLS; between++) {
-      for (int share = 0; share < NUM_SHARES; share++) {
-         for (int grouptype = 0; grouptype < 4; grouptype++) {
-            cout << paths[between][share][grouptype] << " ";
-         }
-         cout << ": ";
-      }
-      cout << "\n";
-   }
+   //for (int between = 0; between < HALF_COLS; between++) {
+   //   for (int share = 0; share < NUM_SHARES; share++) {
+   //      for (int grouptype = 0; grouptype < 4; grouptype++) {
+   //         cout << paths[between][share][grouptype] << " ";
+   //      }
+   //      cout << ": ";
+   //   }
+   //   cout << "\n";
+   //}
 }
 
 
@@ -159,7 +181,6 @@ void path_finder_3d() {
                 (paths[between][get<3>(kv.first)][group_to_grouptype[group][3]] > -1) &&
                 (paths[between][get<4>(kv.first)][group_to_grouptype[group][4]] > -1) &&
                 (paths[between][get<5>(kv.first)][group_to_grouptype[group][5]] > -1)) {
-               cout << "btw:" << between << " share:" << get<1>(kv.first) << " grouptype:" << group_to_grouptype[group][1] << " result:" << paths[between][get<1>(kv.first)][group_to_grouptype[group][1]] << "\n";
                btw_map[between][make_tuple(paths[between][get<0>(kv.first)][group_to_grouptype[group][0]],
                                            paths[between][get<1>(kv.first)][group_to_grouptype[group][1]],
                                            paths[between][get<2>(kv.first)][group_to_grouptype[group][2]],
@@ -172,14 +193,12 @@ void path_finder_3d() {
    }
    int current_flipped[6];
    for (auto kv : btw_map[HALF_COLS - 1]) {
-      cout << "kv (" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") \n";
       current_flipped[0] = MAX_SHARE - get<0>(kv.first);
       current_flipped[1] = MAX_SHARE - get<1>(kv.first);
       current_flipped[2] = MAX_SHARE - get<2>(kv.first);
       current_flipped[3] = MAX_SHARE - get<3>(kv.first);
       current_flipped[4] = MAX_SHARE - get<4>(kv.first);
       current_flipped[5] = MAX_SHARE - get<5>(kv.first);
-      cout << "current_flipped (" << current_flipped[0] << ","  << current_flipped[1] << ","  << current_flipped[2] << ","  << current_flipped[3] << ","  << current_flipped[4] << ","  << current_flipped[5] << ") \n";
       for (int translation = 0; translation < 6; translation++) {
          btw_3d_key_t translated_key = make_tuple(current_flipped[translator[translation][0]],
                                                   current_flipped[translator[translation][1]],
@@ -187,11 +206,8 @@ void path_finder_3d() {
                                                   current_flipped[translator[translation][3]],
                                                   current_flipped[translator[translation][4]],
                                                   current_flipped[translator[translation][5]]);
-         cout << "translated_key (" << get<0>(translated_key) << ","  << get<1>(translated_key) << ","  << get<2>(translated_key) << ","  << get<3>(translated_key) << ","  << get<4>(translated_key) << ","  << get<5>(translated_key) << ") \n";
          if (btw_map[HALF_COLS - 1].find(translated_key) != btw_map[HALF_COLS - 1].end()) {
-            cout << "That one! ^\n";
             joining[kv.first].push_back(make_tuple(translated_key, translation));
-            //joining[translated_key].push_back(make_tuple(kv.first, translation));
          }
       }
    }
@@ -205,18 +221,19 @@ void print_path_search_3d() {
       cout << "between columns " << between << " and " << between + 1 << " has " << btw_map[between].size() << "\n";
    }
    cout << "joining has " << joining.size() << "\n\n";
-   for (int between = 0; between < HALF_COLS; between++) {
-      for (auto kv : btw_map[between]) {
-         cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
-      }
-      cout << "\n\n";
-   }
-   for (auto kv : joining) {
-      cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") \n";
-      for (auto kg : kv.second) {
-         cout << "  " << get<1>(kg) << " (" << get<0>(get<0>(kg)) << ","  << get<1>(get<0>(kg)) << ","  << get<2>(get<0>(kg)) << ","  << get<3>(get<0>(kg)) << ","  << get<4>(get<0>(kg)) << ","  << get<5>(get<0>(kg)) << ") \n";
-      }
-   }
+   //for (int between = 0; between < HALF_COLS; between++) {
+   //   for (auto kv : btw_map[between]) {
+   //      cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
+   //   }
+   //   cout << "\n\n";
+   //}
+   //for (auto kv : joining) {
+   //   cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") \n";
+   //   for (auto kg : kv.second) {
+   //      cout << "  " << get<1>(kg) << " (" << get<0>(get<0>(kg)) << ","  << get<1>(get<0>(kg)) << ","  << get<2>(get<0>(kg)) << ","  << get<3>(get<0>(kg)) << ","  << get<4>(get<0>(kg)) << ","  << get<5>(get<0>(kg)) << ") \n";
+   //   }
+   //}
+   //cout << "\n";
 }
 
 
@@ -241,28 +258,35 @@ vector<string> recursive_print_answers_3d(int depth, btw_3d_key_t base, string s
    return solutions;
 }
 
-void print_answers_3d() {
+void print_answers_3d(bool only_count) {
    btw_3d_key_t front_base;
    int groups[N];
+   int count = 0;
    for (auto meeting : joining) {
       front_base = meeting.first;
       vector<string> front_solutions = recursive_print_answers_3d(HALF_COLS - 1, front_base, "", -1);
       for (auto shuffle_qp : meeting.second) {
          vector<string> back_solutions = recursive_print_answers_3d(HALF_COLS - 1, get<0>(shuffle_qp), "", get<1>(shuffle_qp));
-         for (auto fs : front_solutions) {
-            for (auto bs : back_solutions) {
-               cout << fs << bs << "\n";
+         if (!only_count) {
+            for (auto fs : front_solutions) {
+               for (auto bs : back_solutions) {
+                  cout << fs << bs << "\n";
+               }
             }
          }
+         count += front_solutions.size() * back_solutions.size();
       }
    }
+   cout << "Total solutions: " << count << "\n";
 }
 
 
 int main() {
-   path_maker_3d();
-   print_path_3d();
-   path_finder_3d();
-   print_path_search_3d();
-   print_answers_3d();
+   #ifdef THREE_D
+      path_maker_3d();
+      //print_path_3d();
+      path_finder_3d();
+      //print_path_search_3d();
+      print_answers_3d(true);
+   #endif
 }

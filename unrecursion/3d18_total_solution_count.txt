@@ -1,0 +1,5 @@
+Total solutions: 74646644
+
+real    0m24.260s
+user    0m23.505s
+sys     0m0.119s
