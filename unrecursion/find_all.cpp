@@ -5,6 +5,7 @@
 #include <math.h>
 #include <unordered_map>
 #include <deque>
+#include <set>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6
 #define SEARCH_4d12
@@ -518,7 +519,7 @@ struct key_equal_4d : public binary_function<btw_4d_key_t, btw_4d_key_t, size_t>
 };
 
 typedef unordered_map<const btw_4d_key_t, btw_4d_data_t, key_hash_4d, key_equal_4d> btw_4d_map_t;
-typedef unordered_map<const btw_4d_key_t, deque<tuple<btw_3d_key_t, btw_3d_key_t, btw_3d_key_t, btw_3d_key_t>>, key_hash_4d, key_equal_4d> btw_4d_to_btw_3d_t;
+typedef unordered_map<const btw_4d_key_t, set<tuple<btw_3d_key_t, btw_3d_key_t, btw_3d_key_t, btw_3d_key_t>>, key_hash_4d, key_equal_4d> btw_4d_to_btw_3d_t;
 typedef unordered_map<const btw_4d_key_t, unordered_map<int, btw_4d_key_t>, key_hash_4d, key_equal_4d> btw_4d_map_sols_t;
 
 
@@ -655,7 +656,7 @@ void path_finder_4d() {
                                      {5, 5, 5, 23}}};
    btw_3d_key_t next_3d_key = make_tuple(N, N - 1, 0, N - 1, 0, 0);
    btw_4d_key_t next_4d_key = get_next_key_4d(make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0, 0);
-   btw_map_4d_3d[0][next_4d_key].push_back(make_tuple(next_3d_key, next_3d_key, next_3d_key, next_3d_key));
+   btw_map_4d_3d[0][next_4d_key].insert(make_tuple(next_3d_key, next_3d_key, next_3d_key, next_3d_key));
    btw_map_4d[0][next_4d_key].push_back(make_tuple(make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0));
    for (int between = 1; between < HALF_COLS; between++) {
       for (auto kv : btw_map_4d[between - 1]) {
@@ -668,10 +669,10 @@ void path_finder_4d() {
                   good &= (btw_map_solutions[between - 1][get<3>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][2]) != btw_map_solutions[between - 1][get<0>(set_3d)].end());
                   if (good) {
                      next_4d_key = get_next_key_4d(kv.first, combine_3d_to_4d[abc_option.first][i][3], between);
-                     btw_map_4d_3d[between][next_4d_key].push_back(make_tuple(btw_map_solutions[between - 1][get<0>(set_3d)][abc_option.first],
-                                                                              btw_map_solutions[between - 1][get<1>(set_3d)][combine_3d_to_4d[abc_option.first][i][0]],
-                                                                              btw_map_solutions[between - 1][get<2>(set_3d)][combine_3d_to_4d[abc_option.first][i][1]],
-                                                                              btw_map_solutions[between - 1][get<3>(set_3d)][combine_3d_to_4d[abc_option.first][i][2]]));
+                     btw_map_4d_3d[between][next_4d_key].insert(make_tuple(btw_map_solutions[between - 1][get<0>(set_3d)][abc_option.first],
+                                                                           btw_map_solutions[between - 1][get<1>(set_3d)][combine_3d_to_4d[abc_option.first][i][0]],
+                                                                           btw_map_solutions[between - 1][get<2>(set_3d)][combine_3d_to_4d[abc_option.first][i][1]],
+                                                                           btw_map_solutions[between - 1][get<3>(set_3d)][combine_3d_to_4d[abc_option.first][i][2]]));
                      btw_map_4d[between][next_4d_key].push_back(make_tuple(kv.first, combine_3d_to_4d[abc_option.first][i][3]));
                   }
                }
@@ -1016,7 +1017,6 @@ vector<string> recursive_print_answers_4d(int depth, btw_4d_key_t base, string s
       for (auto qp : btw_map_4d[depth][base]) {
          vector<string> more_solutions;
          if (translation < 0) {
-            cout << "depth = " << depth << ", so_far = " << get_group_4d[get<1>(qp)] + so_far << "\n";
             more_solutions = recursive_print_answers_4d(depth - 1, get<0>(qp), get_group_4d[get<1>(qp)] + so_far, translation);
          }
          else {
@@ -1037,9 +1037,6 @@ void print_answers_4d(bool only_count) {
       front_base = meeting.first;
       vector<string> front_solutions = recursive_print_answers_4d(HALF_COLS - 1, front_base, "", -1);
       cout << "front base assigned. size: "<< front_solutions.size() <<"\n";
-      for (auto fs : front_solutions) {
-         cout << fs << "\n";
-      }
       for (auto shuffle_qp : meeting.second) {
          vector<string> back_solutions = recursive_print_answers_4d(HALF_COLS - 1, get<0>(shuffle_qp), "", get<1>(shuffle_qp));
          cout << "back base assigned. size: "<< back_solutions.size() <<"\n";
@@ -1073,6 +1070,6 @@ int main() {
       print_path_search_4d(false); // true for just number of solutions
       make_answer_tree_4d();
       print_answer_tree_4d(false); // true for just search width
-      print_answers_4d(true); // true for just number of solutions
+      print_answers_4d(false); // true for just number of solutions
    #endif
 }
