@@ -501,7 +501,19 @@ struct key_equal_4d : public binary_function<btw_4d_key_t, btw_4d_key_t, size_t>
               get<20>(k0) == get<20>(k1) &&
               get<21>(k0) == get<21>(k1) &&
               get<22>(k0) == get<22>(k1) &&
-              get<23>(k0) == get<23>(k1));
+              get<23>(k0) == get<23>(k1) &&
+              get<24>(k0) == get<24>(k1) &&
+              get<25>(k0) == get<25>(k1) &&
+              get<26>(k0) == get<26>(k1) &&
+              get<27>(k0) == get<27>(k1) &&
+              get<28>(k0) == get<28>(k1) &&
+              get<29>(k0) == get<29>(k1) &&
+              get<30>(k0) == get<30>(k1) &&
+              get<31>(k0) == get<31>(k1) &&
+              get<32>(k0) == get<32>(k1) &&
+              get<33>(k0) == get<33>(k1) &&
+              get<34>(k0) == get<34>(k1) &&
+              get<35>(k0) == get<35>(k1));
    }
 };
 
@@ -994,6 +1006,57 @@ void print_answer_tree_4d(bool only_count) {
 }
 
 
+// answer printing
+vector<string> recursive_print_answers_4d(int depth, btw_4d_key_t base, string so_far, int translation) {
+   vector<string> solutions = {};
+   if (depth == -1) {
+      solutions.push_back(so_far);
+   }
+   else {
+      for (auto qp : btw_map_4d[depth][base]) {
+         vector<string> more_solutions;
+         if (translation < 0) {
+            cout << "depth = " << depth << ", so_far = " << get_group_4d[get<1>(qp)] + so_far << "\n";
+            more_solutions = recursive_print_answers_4d(depth - 1, get<0>(qp), get_group_4d[get<1>(qp)] + so_far, translation);
+         }
+         else {
+            more_solutions = recursive_print_answers_4d(depth - 1, get<0>(qp), so_far + get_group_4d[translator_4d_backwards[translation][get<1>(qp)]], translation);
+         }
+         solutions.insert(solutions.end(), more_solutions.begin(), more_solutions.end());
+      }
+   }
+   return solutions;
+}
+
+void print_answers_4d(bool only_count) {
+   btw_4d_key_t front_base;
+   int groups[N];
+   int count = 0;
+   for (auto meeting : joining_4d) {
+      // ^should be able to parallelize this for loop
+      front_base = meeting.first;
+      vector<string> front_solutions = recursive_print_answers_4d(HALF_COLS - 1, front_base, "", -1);
+      cout << "front base assigned. size: "<< front_solutions.size() <<"\n";
+      for (auto fs : front_solutions) {
+         cout << fs << "\n";
+      }
+      for (auto shuffle_qp : meeting.second) {
+         vector<string> back_solutions = recursive_print_answers_4d(HALF_COLS - 1, get<0>(shuffle_qp), "", get<1>(shuffle_qp));
+         cout << "back base assigned. size: "<< back_solutions.size() <<"\n";
+         if (!only_count) {
+            for (auto fs : front_solutions) {
+               for (auto bs : back_solutions) {
+                  cout << fs << bs << "\n";
+               }
+            }
+         }
+         count += front_solutions.size() * back_solutions.size();
+      }
+   }
+   cout << "Total 4d" << N << " solutions: " << count << "\n";
+}
+
+
 int main() {
    #ifdef THREE_D
       initialize_stuff();
@@ -1010,5 +1073,6 @@ int main() {
       print_path_search_4d(false); // true for just number of solutions
       make_answer_tree_4d();
       print_answer_tree_4d(false); // true for just search width
+      print_answers_4d(true); // true for just number of solutions
    #endif
 }
