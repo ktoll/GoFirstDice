@@ -86,33 +86,37 @@ int translator_unbackwards[6][6] = {{0, 1, 2, 3, 4, 5}, //from is abc, to is fir
                                     {5, 4, 3, 2, 1, 0}};
 int backwards[6] = {5, 3, 4, 1, 2, 0};
 int translator[6][6];
-int translator_4d[24][24] = {{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}, \
-                             { 1,  0,  4,  5,  2,  3,  7,  6, 10, 11,  8,  9, 18, 19, 20, 21, 22, 23, 12, 13, 14, 15, 16, 17}, \
-                             { 2,  3,  0,  1,  5,  4, 12, 13, 14, 15, 16, 17,  6,  7,  8,  9, 10, 11, 19, 18, 22, 23, 20, 21}, \
-                             { 4,  5,  1,  0,  3,  2, 18, 19, 20, 21, 22, 23,  7,  6, 10, 11,  8,  9, 13, 12, 16, 17, 14, 15}, \
-                             { 3,  2,  5,  4,  0,  1, 13, 12, 16, 17, 14, 15, 19, 18, 22, 23, 20, 21,  6,  7,  8,  9, 10, 11}, \
-                             { 5,  4,  3,  2,  1,  0, 19, 18, 22, 23, 20, 21, 13, 12, 16, 17, 14, 15,  7,  6, 10, 11,  8,  9}, \
-                             { 6,  7,  8,  9, 10, 11,  0,  1,  2,  3,  4,  5, 14, 15, 12, 13, 17, 16, 20, 21, 18, 19, 23, 22}, \
-                             { 7,  6, 10, 11,  8,  9,  1,  0,  4,  5,  2,  3, 20, 21, 18, 19, 23, 22, 14, 15, 12, 13, 17, 16}, \
-                             {12, 13, 14, 15, 16, 17,  2,  3,  0,  1,  5,  4,  8,  9,  6,  7, 11, 10, 22, 23, 19, 18, 21, 20}, \
-                             {18, 19, 20, 21, 22, 23,  4,  5,  1,  0,  3,  2, 10, 11,  7, 6,  9,  8,  16, 17, 13, 12, 15, 14}, \
-                             {13, 12, 16, 17, 14, 15,  3,  2,  5,  4,  0,  1, 22, 23, 19, 18, 21, 20,  8,  9,  6,  7, 11, 10}, \
-                             {19, 18, 22, 23, 20, 21,  5,  4,  3,  2,  1,  0, 16, 17, 13, 12, 15, 14, 10, 11,  7,  6,  9,  8}, \
-                             { 8,  9,  6,  7, 11, 10, 14, 15, 12, 13, 17, 16,  0,  1,  2,  3,  4,  5, 21, 20, 23, 22, 18, 19}, \
-                             {10, 11,  7,  6,  9,  8, 20, 21, 18, 19, 23, 22,  1,  0,  4,  5,  2,  3, 15, 14, 17, 16, 12, 13}, \
-                             {14, 15, 12, 13, 17, 16,  8,  9,  6,  7, 11, 10,  2,  3,  0,  1,  5,  4, 23, 22, 21, 20, 19, 18}, \
-                             {20, 21, 18, 19, 23, 22, 10, 11,  7,  6,  9,  8,  4,  5,  1,  0,  3,  2, 17, 16, 15, 14, 13, 12}, \
-                             {16, 17, 13, 12, 15, 14, 22, 23, 19, 18, 21, 20,  3,  2,  5,  4,  0,  1,  9,  8, 11, 10,  6,  7}, \
-                             {22, 23, 19, 18, 21, 20, 16, 17, 13, 12, 15, 14,  5,  4,  3,  2,  1,  0, 11, 10,  9,  8,  7,  6}, \
-                             { 9,  8, 11, 10,  6,  7, 15, 14, 17, 16, 12, 13, 21, 20, 23, 22, 18, 19,  0,  1,  2,  3,  4,  5}, \
-                             {11, 10,  9,  8,  7,  6, 21, 20, 23, 22, 18, 19, 15, 14, 17, 16, 12, 13,  1,  0,  4,  5,  2,  3}, \
-                             {15, 14, 17, 16, 12, 13,  9,  8, 11, 10,  6,  7, 23, 22, 21, 20, 19, 18,  2,  3,  0,  1,  5,  4}, \
-                             {21, 20, 23, 22, 18, 19, 11, 10,  9,  8,  7,  6, 17, 16, 15, 14, 13, 12,  4,  5,  1,  0,  3,  2}, \
-                             {17, 16, 15, 14, 13, 12, 23, 22, 21, 20, 19, 18,  9,  8, 11, 10,  6,  7,  3,  2,  5,  4,  0,  1}, \
-                             {23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0}};
-int translator_4d_backwards[24][24];
-                      // 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
-int backwards_4d[24] = {23, 17, 21, 11, 15,  9, 22, 16, 19,  5, 13,  3, 20, 10, 18,  4,  7,  1, 14,  8, 12,  2,  6,  0};
+                                                                                                                           // ab  ac  ad  ba  bc  bd  ca  cb  cd  da  db  dc
+int translator_4d[24][36] = {{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35}, 
+                             { 1,  0,  4,  5,  2,  3,  7,  6, 10, 11,  8,  9, 18, 19, 20, 21, 22, 23, 12, 13, 14, 15, 16, 17, 24, 26, 25, 27, 29, 28, 33, 34, 35, 30, 31, 32}, 
+                             { 2,  3,  0,  1,  5,  4, 12, 13, 14, 15, 16, 17,  6,  7,  8,  9, 10, 11, 19, 18, 22, 23, 20, 21, 25, 24, 26, 30, 31, 32, 27, 28, 29, 33, 35, 34}, 
+                             { 4,  5,  1,  0,  3,  2, 18, 19, 20, 21, 22, 23,  7,  6, 10, 11,  8,  9, 13, 12, 16, 17, 14, 15, 26, 24, 25, 33, 34, 35, 27, 29, 28, 30, 32, 31}, 
+                             { 3,  2,  5,  4,  0,  1, 13, 12, 16, 17, 14, 15, 19, 18, 22, 23, 20, 21,  6,  7,  8,  9, 10, 11, 25, 26, 24, 30, 32, 31, 33, 35, 34, 27, 28, 29}, 
+                             { 5,  4,  3,  2,  1,  0, 19, 18, 22, 23, 20, 21, 13, 12, 16, 17, 14, 15,  7,  6, 10, 11,  8,  9, 26, 25, 24, 33, 35, 34, 30, 32, 31, 27, 29, 28}, 
+                             { 6,  7,  8,  9, 10, 11,  0,  1,  2,  3,  4,  5, 14, 15, 12, 13, 17, 16, 20, 21, 18, 19, 23, 22, 27, 28, 29, 24, 25, 26, 31, 30, 32, 34, 33, 35}, 
+                             { 7,  6, 10, 11,  8,  9,  1,  0,  4,  5,  2,  3, 20, 21, 18, 19, 23, 22, 14, 15, 12, 13, 17, 16, 27, 29, 28, 24, 26, 25, 34, 33, 35, 31, 30, 32}, 
+                             {12, 13, 14, 15, 16, 17,  2,  3,  0,  1,  5,  4,  8,  9,  6,  7, 11, 10, 22, 23, 19, 18, 21, 20, 30, 31, 32, 25, 24, 26, 28, 27, 29, 35, 33, 34}, 
+                             {18, 19, 20, 21, 22, 23,  4,  5,  1,  0,  3,  2, 10, 11,  7, 6,  9,  8,  16, 17, 13, 12, 15, 14, 33, 34, 35, 26, 24, 25, 29, 27, 28, 32, 30, 31}, 
+                             {13, 12, 16, 17, 14, 15,  3,  2,  5,  4,  0,  1, 22, 23, 19, 18, 21, 20,  8,  9,  6,  7, 11, 10, 30, 32, 31, 25, 26, 24, 35, 33, 34, 28, 27, 29}, 
+                             {19, 18, 22, 23, 20, 21,  5,  4,  3,  2,  1,  0, 16, 17, 13, 12, 15, 14, 10, 11,  7,  6,  9,  8, 33, 35, 34, 26, 25, 24, 32, 30, 31, 29, 27, 28}, 
+                             { 8,  9,  6,  7, 11, 10, 14, 15, 12, 13, 17, 16,  0,  1,  2,  3,  4,  5, 21, 20, 23, 22, 18, 19, 28, 27, 29, 31, 30, 32, 24, 25, 26, 34, 35, 33}, 
+                             {10, 11,  7,  6,  9,  8, 20, 21, 18, 19, 23, 22,  1,  0,  4,  5,  2,  3, 15, 14, 17, 16, 12, 13, 29, 27, 28, 34, 33, 35, 24, 26, 25, 31, 32, 30}, 
+                             {14, 15, 12, 13, 17, 16,  8,  9,  6,  7, 11, 10,  2,  3,  0,  1,  5,  4, 23, 22, 21, 20, 19, 18, 31, 30, 32, 28, 27, 29, 25, 24, 26, 35, 34, 33}, 
+                             {20, 21, 18, 19, 23, 22, 10, 11,  7,  6,  9,  8,  4,  5,  1,  0,  3,  2, 17, 16, 15, 14, 13, 12, 34, 33, 35, 29, 27, 28, 26, 24, 25, 32, 31, 30}, 
+                             {16, 17, 13, 12, 15, 14, 22, 23, 19, 18, 21, 20,  3,  2,  5,  4,  0,  1,  9,  8, 11, 10,  6,  7, 32, 30, 31, 35, 33, 34, 25, 26, 24, 28, 29, 27}, 
+                             {22, 23, 19, 18, 21, 20, 16, 17, 13, 12, 15, 14,  5,  4,  3,  2,  1,  0, 11, 10,  9,  8,  7,  6, 35, 33, 34, 32, 30, 31, 26, 25, 24, 29, 28, 27}, 
+                             { 9,  8, 11, 10,  6,  7, 15, 14, 17, 16, 12, 13, 21, 20, 23, 22, 18, 19,  0,  1,  2,  3,  4,  5, 28, 29, 27, 31, 32, 30, 34, 35, 33, 24, 25, 26}, 
+                             {11, 10,  9,  8,  7,  6, 21, 20, 23, 22, 18, 19, 15, 14, 17, 16, 12, 13,  1,  0,  4,  5,  2,  3, 29, 28, 27, 34, 35, 33, 31, 32, 30, 24, 26, 25}, 
+                             {15, 14, 17, 16, 12, 13,  9,  8, 11, 10,  6,  7, 23, 22, 21, 20, 19, 18,  2,  3,  0,  1,  5,  4, 31, 32, 30, 28, 29, 27, 35, 34, 33, 25, 24, 26}, 
+                             {21, 20, 23, 22, 18, 19, 11, 10,  9,  8,  7,  6, 17, 16, 15, 14, 13, 12,  4,  5,  1,  0,  3,  2, 34, 35, 33, 29, 28, 27, 32, 31, 30, 26, 24, 25}, 
+                             {17, 16, 15, 14, 13, 12, 23, 22, 21, 20, 19, 18,  9,  8, 11, 10,  6,  7,  3,  2,  5,  4,  0,  1, 32, 31, 30, 35, 34, 33, 28, 29, 27, 25, 26, 24}, 
+                             {23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24}};
+//int translator_4d_backwards[24][24];
+int translator_4d_backwards[24][36];
+                      //                                                                                                ab, ac, ad, ba, bc, bd, ca, cb, cd, da, db, dc
+                      // 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35
+int backwards_4d[36] = {23, 17, 21, 11, 15,  9, 22, 16, 19,  5, 13,  3, 20, 10, 18,  4,  7,  1, 14,  8, 12,  2,  6,  0, 27, 30, 33, 24, 31, 34, 25, 28, 35, 26, 29, 32};
+//int backwards_4d[24] = {23, 17, 21, 11, 15,  9, 22, 16, 19,  5, 13,  3, 20, 10, 18,  4,  7,  1, 14,  8, 12,  2,  6,  0};
                         //  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11
 int backwards_4d_2d[12] = { 3,  6,  9,  0,  7, 10,  1,  4, 11,  2,  5,  8};
 int translator_4d_2d[24][12] = {{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11}, // this needs backwarding also
@@ -149,13 +153,12 @@ void initialize_stuff() {
       }
    }
    for (int i = 0; i < 24; i++) {
-      for (int j = 0; j < 24; j++) {
+      for (int j = 0; j < 36; j++) {
          translator_4d_backwards[i][j] = translator_4d[i][backwards_4d[j]];
       }
-      for (int j = 0; j < 12; j++) {
-         translator_4d_2d_backwards[i][j] = translator_4d_2d[i][backwards_4d_2d[j]];
-         //translator_4d_2d_backwards[i][j] = translator_4d_2d[i][backwards_4d[j * 2] / 2];
-      }
+      //for (int j = 0; j < 12; j++) {
+      //   translator_4d_2d_backwards[i][j] = translator_4d_2d[i][backwards_4d_2d[j]];
+      //}
    }
    //for (int i = 0; i < 24; i++) {
    //   for (int j = 0; j < 24; j++) {
@@ -324,25 +327,25 @@ void path_finder_3d() {
    int current_flipped[6];
    for (auto kv : btw_map[HALF_COLS - 1]) {
       // ^should be able to parallelize this for loop
-      //current_flipped[0] = MAX_SHARE - get<0>(kv.first);
-      //current_flipped[1] = MAX_SHARE - get<1>(kv.first);
-      //current_flipped[2] = MAX_SHARE - get<2>(kv.first);
-      //current_flipped[3] = MAX_SHARE - get<3>(kv.first);
-      //current_flipped[4] = MAX_SHARE - get<4>(kv.first);
-      //current_flipped[5] = MAX_SHARE - get<5>(kv.first);
-      current_flipped[0] = MAX_SHARE - get<5>(kv.first);
-      current_flipped[1] = MAX_SHARE - get<3>(kv.first);
-      current_flipped[2] = MAX_SHARE - get<4>(kv.first);
-      current_flipped[3] = MAX_SHARE - get<1>(kv.first);
-      current_flipped[4] = MAX_SHARE - get<2>(kv.first);
-      current_flipped[5] = MAX_SHARE - get<0>(kv.first);
+      current_flipped[0] = MAX_SHARE - get<0>(kv.first);
+      current_flipped[1] = MAX_SHARE - get<1>(kv.first);
+      current_flipped[2] = MAX_SHARE - get<2>(kv.first);
+      current_flipped[3] = MAX_SHARE - get<3>(kv.first);
+      current_flipped[4] = MAX_SHARE - get<4>(kv.first);
+      current_flipped[5] = MAX_SHARE - get<5>(kv.first);
+      //current_flipped[0] = MAX_SHARE - get<5>(kv.first);
+      //current_flipped[1] = MAX_SHARE - get<3>(kv.first);
+      //current_flipped[2] = MAX_SHARE - get<4>(kv.first);
+      //current_flipped[3] = MAX_SHARE - get<1>(kv.first);
+      //current_flipped[4] = MAX_SHARE - get<2>(kv.first);
+      //current_flipped[5] = MAX_SHARE - get<0>(kv.first);
       for (int translation = 0; translation < 6; translation++) {
-         btw_3d_key_t translated_key = make_tuple(current_flipped[translator_unbackwards[translation][0]],
-                                                  current_flipped[translator_unbackwards[translation][1]],
-                                                  current_flipped[translator_unbackwards[translation][2]],
-                                                  current_flipped[translator_unbackwards[translation][3]],
-                                                  current_flipped[translator_unbackwards[translation][4]],
-                                                  current_flipped[translator_unbackwards[translation][5]]);
+         btw_3d_key_t translated_key = make_tuple(current_flipped[translator[translation][0]],
+                                                  current_flipped[translator[translation][1]],
+                                                  current_flipped[translator[translation][2]],
+                                                  current_flipped[translator[translation][3]],
+                                                  current_flipped[translator[translation][4]],
+                                                  current_flipped[translator[translation][5]]);
          if (btw_map[HALF_COLS - 1].find(translated_key) != btw_map[HALF_COLS - 1].end()) {
             joining[kv.first].push_back(make_tuple(translated_key, translation));
          }
@@ -462,6 +465,7 @@ void print_answer_tree_3d(bool only_count) {
 }
 
 // 4d ----------------------------------------------------------------------------------------------
+#ifdef FOUR_D
 // between tuple struct map queue stuff
 typedef tuple<int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int> btw_4d_key_t; // 24 4 letter perms, 12 2 letter perms
 typedef deque<tuple<btw_4d_key_t, int>> btw_4d_data_t;
@@ -654,6 +658,18 @@ void path_finder_4d() {
                                      {3, 3, 2, 15},
                                      {5, 3, 3, 17},
                                      {5, 5, 5, 23}}};
+   int has_2d_in_4d[12][4] = {{ 0,  1, 16, 22}, // ab
+                              { 2,  3, 10, 20}, // ac
+                              { 4,  5,  8, 14}, // ad
+                              { 6,  7, 17, 23}, // ba
+                              { 8,  9,  4, 18}, // bc
+                              {10, 11,  2, 12}, // bd
+                              {12, 13, 11, 21}, // ca
+                              {14, 15,  5, 19}, // cb
+                              {16, 17,  0,  6}, // cd
+                              {18, 19,  9, 15}, // da
+                              {20, 21,  3, 13}, // db
+                              {22, 23,  1,  7}};// dc
    btw_3d_key_t next_3d_key = make_tuple(N, N - 1, 0, N - 1, 0, 0);
    btw_4d_key_t next_4d_key = get_next_key_4d(make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0, 0);
    btw_map_4d_3d[0][next_4d_key].insert(make_tuple(next_3d_key, next_3d_key, next_3d_key, next_3d_key));
@@ -684,79 +700,125 @@ void path_finder_4d() {
    int current_flipped[36];
    for (auto kv : btw_map_4d[HALF_COLS - 1]) {
       // ^should be able to parallelize this for loop
-      current_flipped[backwards_4d[ 0]] = MAX_SHARE_4d - get< 0>(kv.first);
-      current_flipped[backwards_4d[ 1]] = MAX_SHARE_4d - get< 1>(kv.first);
-      current_flipped[backwards_4d[ 2]] = MAX_SHARE_4d - get< 2>(kv.first);
-      current_flipped[backwards_4d[ 3]] = MAX_SHARE_4d - get< 3>(kv.first);
-      current_flipped[backwards_4d[ 4]] = MAX_SHARE_4d - get< 4>(kv.first);
-      current_flipped[backwards_4d[ 5]] = MAX_SHARE_4d - get< 5>(kv.first);
-      current_flipped[backwards_4d[ 6]] = MAX_SHARE_4d - get< 6>(kv.first);
-      current_flipped[backwards_4d[ 7]] = MAX_SHARE_4d - get< 7>(kv.first);
-      current_flipped[backwards_4d[ 8]] = MAX_SHARE_4d - get< 8>(kv.first);
-      current_flipped[backwards_4d[ 9]] = MAX_SHARE_4d - get< 9>(kv.first);
-      current_flipped[backwards_4d[10]] = MAX_SHARE_4d - get<10>(kv.first);
-      current_flipped[backwards_4d[11]] = MAX_SHARE_4d - get<11>(kv.first);
-      current_flipped[backwards_4d[12]] = MAX_SHARE_4d - get<12>(kv.first);
-      current_flipped[backwards_4d[13]] = MAX_SHARE_4d - get<13>(kv.first);
-      current_flipped[backwards_4d[14]] = MAX_SHARE_4d - get<14>(kv.first);
-      current_flipped[backwards_4d[15]] = MAX_SHARE_4d - get<15>(kv.first);
-      current_flipped[backwards_4d[16]] = MAX_SHARE_4d - get<16>(kv.first);
-      current_flipped[backwards_4d[17]] = MAX_SHARE_4d - get<17>(kv.first);
-      current_flipped[backwards_4d[18]] = MAX_SHARE_4d - get<18>(kv.first);
-      current_flipped[backwards_4d[19]] = MAX_SHARE_4d - get<19>(kv.first);
-      current_flipped[backwards_4d[20]] = MAX_SHARE_4d - get<20>(kv.first);
-      current_flipped[backwards_4d[21]] = MAX_SHARE_4d - get<21>(kv.first);
-      current_flipped[backwards_4d[22]] = MAX_SHARE_4d - get<22>(kv.first);
-      current_flipped[backwards_4d[23]] = MAX_SHARE_4d - get<23>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 0]] = MAX_SHARE_4d_2d - get<24>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 1]] = MAX_SHARE_4d_2d - get<25>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 2]] = MAX_SHARE_4d_2d - get<26>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 3]] = MAX_SHARE_4d_2d - get<27>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 4]] = MAX_SHARE_4d_2d - get<28>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 5]] = MAX_SHARE_4d_2d - get<29>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 6]] = MAX_SHARE_4d_2d - get<30>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 7]] = MAX_SHARE_4d_2d - get<31>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 8]] = MAX_SHARE_4d_2d - get<32>(kv.first);
-      current_flipped[24 + backwards_4d_2d[ 9]] = MAX_SHARE_4d_2d - get<33>(kv.first);
-      current_flipped[24 + backwards_4d_2d[10]] = MAX_SHARE_4d_2d - get<34>(kv.first);
-      current_flipped[24 + backwards_4d_2d[11]] = MAX_SHARE_4d_2d - get<35>(kv.first);
+      current_flipped[ 0] = MAX_SHARE_4d - get< 0>(kv.first);
+      current_flipped[ 1] = MAX_SHARE_4d - get< 1>(kv.first);
+      current_flipped[ 2] = MAX_SHARE_4d - get< 2>(kv.first);
+      current_flipped[ 3] = MAX_SHARE_4d - get< 3>(kv.first);
+      current_flipped[ 4] = MAX_SHARE_4d - get< 4>(kv.first);
+      current_flipped[ 5] = MAX_SHARE_4d - get< 5>(kv.first);
+      current_flipped[ 6] = MAX_SHARE_4d - get< 6>(kv.first);
+      current_flipped[ 7] = MAX_SHARE_4d - get< 7>(kv.first);
+      current_flipped[ 8] = MAX_SHARE_4d - get< 8>(kv.first);
+      current_flipped[ 9] = MAX_SHARE_4d - get< 9>(kv.first);
+      current_flipped[10] = MAX_SHARE_4d - get<10>(kv.first);
+      current_flipped[11] = MAX_SHARE_4d - get<11>(kv.first);
+      current_flipped[12] = MAX_SHARE_4d - get<12>(kv.first);
+      current_flipped[13] = MAX_SHARE_4d - get<13>(kv.first);
+      current_flipped[14] = MAX_SHARE_4d - get<14>(kv.first);
+      current_flipped[15] = MAX_SHARE_4d - get<15>(kv.first);
+      current_flipped[16] = MAX_SHARE_4d - get<16>(kv.first);
+      current_flipped[17] = MAX_SHARE_4d - get<17>(kv.first);
+      current_flipped[18] = MAX_SHARE_4d - get<18>(kv.first);
+      current_flipped[19] = MAX_SHARE_4d - get<19>(kv.first);
+      current_flipped[20] = MAX_SHARE_4d - get<20>(kv.first);
+      current_flipped[21] = MAX_SHARE_4d - get<21>(kv.first);
+      current_flipped[22] = MAX_SHARE_4d - get<22>(kv.first);
+      current_flipped[23] = MAX_SHARE_4d - get<23>(kv.first);
+      current_flipped[24] = MAX_SHARE_4d_2d - get<24>(kv.first);
+      current_flipped[25] = MAX_SHARE_4d_2d - get<25>(kv.first);
+      current_flipped[26] = MAX_SHARE_4d_2d - get<26>(kv.first);
+      current_flipped[27] = MAX_SHARE_4d_2d - get<27>(kv.first);
+      current_flipped[28] = MAX_SHARE_4d_2d - get<28>(kv.first);
+      current_flipped[29] = MAX_SHARE_4d_2d - get<29>(kv.first);
+      current_flipped[30] = MAX_SHARE_4d_2d - get<30>(kv.first);
+      current_flipped[31] = MAX_SHARE_4d_2d - get<31>(kv.first);
+      current_flipped[32] = MAX_SHARE_4d_2d - get<32>(kv.first);
+      current_flipped[33] = MAX_SHARE_4d_2d - get<33>(kv.first);
+      current_flipped[34] = MAX_SHARE_4d_2d - get<34>(kv.first);
+      current_flipped[35] = MAX_SHARE_4d_2d - get<35>(kv.first);
+      for (int i = 0; i < 12; i++) {
+         current_flipped[has_2d_in_4d[i][0]] -= ((MAX_SHARE_4d_2d / 2) - current_flipped[24 + i]) * (MAX_SHARE_4d_2d / 2);
+         current_flipped[has_2d_in_4d[i][1]] -= ((MAX_SHARE_4d_2d / 2) - current_flipped[24 + i]) * (MAX_SHARE_4d_2d / 2);
+         current_flipped[has_2d_in_4d[i][2]] += ((MAX_SHARE_4d_2d / 2) - current_flipped[24 + i]) * (MAX_SHARE_4d_2d / 2);
+         current_flipped[has_2d_in_4d[i][3]] += ((MAX_SHARE_4d_2d / 2) - current_flipped[24 + i]) * (MAX_SHARE_4d_2d / 2);
+      }
       for (int translation = 0; translation < 24; translation++) {
-         btw_4d_key_t translated_key = make_tuple(current_flipped[translator_4d[translation][ 0]],
-                                                  current_flipped[translator_4d[translation][ 1]],
-                                                  current_flipped[translator_4d[translation][ 2]],
-                                                  current_flipped[translator_4d[translation][ 3]],
-                                                  current_flipped[translator_4d[translation][ 4]],
-                                                  current_flipped[translator_4d[translation][ 5]],
-                                                  current_flipped[translator_4d[translation][ 6]],
-                                                  current_flipped[translator_4d[translation][ 7]],
-                                                  current_flipped[translator_4d[translation][ 8]],
-                                                  current_flipped[translator_4d[translation][ 9]],
-                                                  current_flipped[translator_4d[translation][10]],
-                                                  current_flipped[translator_4d[translation][11]],
-                                                  current_flipped[translator_4d[translation][12]],
-                                                  current_flipped[translator_4d[translation][13]],
-                                                  current_flipped[translator_4d[translation][14]],
-                                                  current_flipped[translator_4d[translation][15]],
-                                                  current_flipped[translator_4d[translation][16]],
-                                                  current_flipped[translator_4d[translation][17]],
-                                                  current_flipped[translator_4d[translation][18]],
-                                                  current_flipped[translator_4d[translation][19]],
-                                                  current_flipped[translator_4d[translation][20]],
-                                                  current_flipped[translator_4d[translation][21]],
-                                                  current_flipped[translator_4d[translation][22]],
-                                                  current_flipped[translator_4d[translation][23]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 0]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 1]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 2]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 3]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 4]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 5]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 6]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 7]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 8]],
-                                                  current_flipped[24 + translator_4d_2d[translation][ 9]],
-                                                  current_flipped[24 + translator_4d_2d[translation][10]],
-                                                  current_flipped[24 + translator_4d_2d[translation][11]]);
+         btw_4d_key_t translated_key = make_tuple(current_flipped[translator_4d_backwards[translation][ 0]],
+                                                  current_flipped[translator_4d_backwards[translation][ 1]],
+                                                  current_flipped[translator_4d_backwards[translation][ 2]],
+                                                  current_flipped[translator_4d_backwards[translation][ 3]],
+                                                  current_flipped[translator_4d_backwards[translation][ 4]],
+                                                  current_flipped[translator_4d_backwards[translation][ 5]],
+                                                  current_flipped[translator_4d_backwards[translation][ 6]],
+                                                  current_flipped[translator_4d_backwards[translation][ 7]],
+                                                  current_flipped[translator_4d_backwards[translation][ 8]],
+                                                  current_flipped[translator_4d_backwards[translation][ 9]],
+                                                  current_flipped[translator_4d_backwards[translation][10]],
+                                                  current_flipped[translator_4d_backwards[translation][11]],
+                                                  current_flipped[translator_4d_backwards[translation][12]],
+                                                  current_flipped[translator_4d_backwards[translation][13]],
+                                                  current_flipped[translator_4d_backwards[translation][14]],
+                                                  current_flipped[translator_4d_backwards[translation][15]],
+                                                  current_flipped[translator_4d_backwards[translation][16]],
+                                                  current_flipped[translator_4d_backwards[translation][17]],
+                                                  current_flipped[translator_4d_backwards[translation][18]],
+                                                  current_flipped[translator_4d_backwards[translation][19]],
+                                                  current_flipped[translator_4d_backwards[translation][20]],
+                                                  current_flipped[translator_4d_backwards[translation][21]],
+                                                  current_flipped[translator_4d_backwards[translation][22]],
+                                                  current_flipped[translator_4d_backwards[translation][23]],
+                                                  current_flipped[translator_4d_backwards[translation][24]],
+                                                  current_flipped[translator_4d_backwards[translation][25]],
+                                                  current_flipped[translator_4d_backwards[translation][26]],
+                                                  current_flipped[translator_4d_backwards[translation][27]],
+                                                  current_flipped[translator_4d_backwards[translation][28]],
+                                                  current_flipped[translator_4d_backwards[translation][29]],
+                                                  current_flipped[translator_4d_backwards[translation][30]],
+                                                  current_flipped[translator_4d_backwards[translation][31]],
+                                                  current_flipped[translator_4d_backwards[translation][32]],
+                                                  current_flipped[translator_4d_backwards[translation][33]],
+                                                  current_flipped[translator_4d_backwards[translation][34]],
+                                                  current_flipped[translator_4d_backwards[translation][35]]);
+         if ((kv.first == make_tuple(274,230,256,284,314,274,266,262,274,266,278,274,248,280,278,226,278,310,262,266,274,266,274,266,18,18,18,18,18,17,18,18,18,18,19,18)) ||
+             (kv.first == make_tuple(266,274,278,274,274,266,262,266,278,274,274,266,262,266,274,266,274,266,266,262,278,262,278,274,18,18,18,18,18,18,18,18,18,18,18,18))) {
+            cout << translation << " ";
+            cout << "((" << get< 0>(translated_key);
+            cout <<  "," << get< 1>(translated_key);
+            cout <<  "," << get< 2>(translated_key);
+            cout <<  "," << get< 3>(translated_key);
+            cout <<  "," << get< 4>(translated_key);
+            cout <<  "," << get< 5>(translated_key);
+            cout <<  "," << get< 6>(translated_key);
+            cout <<  "," << get< 7>(translated_key);
+            cout <<  "," << get< 8>(translated_key);
+            cout <<  "," << get< 9>(translated_key);
+            cout <<  "," << get<10>(translated_key);
+            cout <<  "," << get<11>(translated_key);
+            cout <<  "," << get<12>(translated_key);
+            cout <<  "," << get<13>(translated_key);
+            cout <<  "," << get<14>(translated_key);
+            cout <<  "," << get<15>(translated_key);
+            cout <<  "," << get<16>(translated_key);
+            cout <<  "," << get<17>(translated_key);
+            cout <<  "," << get<18>(translated_key);
+            cout <<  "," << get<19>(translated_key);
+            cout <<  "," << get<20>(translated_key);
+            cout <<  "," << get<21>(translated_key);
+            cout <<  "," << get<22>(translated_key);
+            cout <<  "," << get<23>(translated_key);
+            cout << ")(" << get<24>(translated_key);
+            cout <<  "," << get<25>(translated_key);
+            cout <<  "," << get<26>(translated_key);
+            cout <<  "," << get<27>(translated_key);
+            cout <<  "," << get<28>(translated_key);
+            cout <<  "," << get<29>(translated_key);
+            cout <<  "," << get<30>(translated_key);
+            cout <<  "," << get<31>(translated_key);
+            cout <<  "," << get<32>(translated_key);
+            cout <<  "," << get<33>(translated_key);
+            cout <<  "," << get<34>(translated_key);
+            cout <<  "," << get<35>(translated_key) << "))\n";
+         }
          if (btw_map_4d[HALF_COLS - 1].find(translated_key) != btw_map_4d[HALF_COLS - 1].end()) {
             joining_4d[kv.first].push_back(make_tuple(translated_key, translation));
          }
@@ -1052,6 +1114,7 @@ void print_answers_4d(bool only_count) {
    }
    cout << "Total 4d" << N << " solutions: " << count << "\n";
 }
+#endif
 
 
 int main() {
@@ -1067,9 +1130,9 @@ int main() {
    #endif
    #ifdef FOUR_D
       path_finder_4d();
-      print_path_search_4d(false); // true for just number of solutions
+      print_path_search_4d(true); // true for just number of solutions
       make_answer_tree_4d();
-      print_answer_tree_4d(false); // true for just search width
+      print_answer_tree_4d(true); // true for just search width
       print_answers_4d(false); // true for just number of solutions
    #endif
 }
