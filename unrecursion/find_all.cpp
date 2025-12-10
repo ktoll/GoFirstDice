@@ -7,8 +7,8 @@
 #include <deque>
 #include <set>
 
-// Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6
-#define SEARCH_4d12
+// Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6, SEARCH_4d12, SEARCH_4d18
+#define SEARCH_4d6
 
 using namespace std;
 
@@ -19,18 +19,25 @@ static string get_group_4d[24] = {"abcd", "abdc", "acbd", "acdb", "adbc", "adcb"
 #ifdef SEARCH_4d6
    #define FOUR_D
    #define SEARCH_3d6
-   //#define MAX_SHARE_4d 39 // for normalized
-   #define MAX_SHARE_4d (N * N * N * N / 24) // fwiw this is wrong
-   #define MAX_SHARE_4d_2d 18 // so is this probably
+   #define MAX_SHARE_4d 39 // for normalized
+   //#define MAX_SHARE_4d (N * N * N * N / 24) // fwiw this is wrong
+   #define MAX_SHARE_4d_2d 9
 #endif
 
 #ifdef SEARCH_4d12
    #define FOUR_D
    #define SEARCH_3d12
-   //#define MAX_SHARE_4d 369 // for normalized
+   #define MAX_SHARE_4d 369 // for normalized
    //#define MAX_SHARE_4d (N * N * N * N / 24)
-   #define MAX_SHARE_4d 540
+   //#define MAX_SHARE_4d 1033
    #define MAX_SHARE_4d_2d 36
+#endif
+
+#ifdef SEARCH_4d18
+   #define FOUR_D
+   #define SEARCH_3d18
+   #define MAX_SHARE_4d 1314 // for normalized
+   #define MAX_SHARE_4d_2d 81
 #endif
 
 #ifdef SEARCH_3d6
@@ -144,7 +151,16 @@ int translator_4d_2d[24][12] = {{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11}
                                 {11,  9, 10,  8,  6,  7,  2,  1,  0,  5,  4,  3},
                                 {11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0}};
 int translator_4d_2d_backwards[24][12];
+int permtype_to_addition_4d[HALF_COLS][10];
 
+
+int sum_things(int thing) {
+   int sum = 0;
+   for (int i = 1; i <= thing; i++) {
+      sum += i;
+   }
+   return sum;
+}
 
 void initialize_stuff() {
    for (int i = 0; i < 6; i++) {
@@ -160,24 +176,19 @@ void initialize_stuff() {
       //   translator_4d_2d_backwards[i][j] = translator_4d_2d[i][backwards_4d_2d[j]];
       //}
    }
-   //for (int i = 0; i < 24; i++) {
-   //   for (int j = 0; j < 24; j++) {
-   //      cout << translator_4d_backwards[i][j] << ",";
-   //   }
-   //   cout << "\n";
-   //}
-   //for (int i = 0; i < 24; i++) {
-   //   for (int j = 0; j < 12; j++) {
-   //      cout << translator_4d_2d[i][j] << " ";
-   //   }
-   //   cout << "\n";
-   //}
-   //for (int i = 0; i < 24; i++) {
-   //   for (int j = 0; j < 12; j++) {
-   //      cout << translator_4d_2d_backwards[i][j] << " ";
-   //   }
-   //   cout << "\n";
-   //}
+   for (int m = 0; m < HALF_COLS; m++) {
+      int n = (HALF_COLS * 2) - m - 1;
+      permtype_to_addition_4d[m][0] = 0;
+      permtype_to_addition_4d[m][1] = sum_things(m - 1);
+      permtype_to_addition_4d[m][2] = sum_things(n - 1);
+      permtype_to_addition_4d[m][3] = permtype_to_addition_4d[m][1] + permtype_to_addition_4d[m][2];
+      permtype_to_addition_4d[m][4] = m * n;
+      permtype_to_addition_4d[m][5] = permtype_to_addition_4d[m][4] + sum_things(m);
+      permtype_to_addition_4d[m][6] = permtype_to_addition_4d[m][4] + sum_things(n);
+      permtype_to_addition_4d[m][7] = 1 + permtype_to_addition_4d[m][4] + sum_things(m) + sum_things(n);
+      permtype_to_addition_4d[m][8] = 0;
+      permtype_to_addition_4d[m][9] = 1;
+   }
 }
 
 
@@ -536,19 +547,32 @@ btw_4d_map_sols_t btw_map_solutions_4d[HALF_COLS - 1];
 
 // path searching
 btw_4d_key_t get_next_key_4d(btw_4d_key_t prev_4d_key, int group, int column) {
-   int n = column;
-   int m = N - column - 1;
-   //                                  add,               add*q,   ab add
-   int grouptype_to_addition[8][3] = {{0,                 m,       n},
-                                      {0,                 (m + 1), n},
-                                      {0,                 m,       (n + 1)},
-                                      {0,                 (m + 1), (n + 1)},
-                                      {n       * m,       m,       n},
-                                      {n       * (m + 1), (m + 1), n},
-                                      {(n + 1) * m,       m,       (n + 1)},
-                                      {(n + 1) * (m + 1), (m + 1), (n + 1)}};
-   // perm = 0, index is group
-   int group_to_grouptype[24] = {7, 6, 3, 3, 6, 2, 5, 4, 5, 5, 4, 4, 3, 3, 1, 1, 3, 1, 6, 2, 4, 4, 2, 0};
+   // group = 0, index is perm
+   int perm_to_permtype[36] = {7, 5, 3, 5, 3, 1, 6, 4, 3, 5, 3, 1, 6, 4, 2, 4, 3, 1, 6, 4, 2, 4, 2, 0, 9, 9, 9, 8, 9, 9, 8, 8, 9, 8, 8, 8};
+   int abcd_to_ab_cd[24][2] = {{24, 32},
+                               {24, 35},
+                               {25, 29},
+                               {25, 34},
+                               {26, 28},
+                               {26, 31},
+                               {27, 32},
+                               {27, 35},
+                               {28, 26},
+                               {28, 33},
+                               {29, 25},
+                               {29, 30},
+                               {30, 29},
+                               {30, 34},
+                               {31, 26},
+                               {31, 33},
+                               {32, 24},
+                               {32, 27},
+                               {33, 28},
+                               {33, 31},
+                               {34, 25},
+                               {34, 30},
+                               {35, 24},
+                               {35, 27}};
    // [perm][group]
    int prev_key[36];
    int next_key[36];
@@ -589,10 +613,11 @@ btw_4d_key_t get_next_key_4d(btw_4d_key_t prev_4d_key, int group, int column) {
    prev_key[34] = get<34>(prev_4d_key);
    prev_key[35] = get<35>(prev_4d_key);
    for (int i = 0; i < 24; i++) {
-      next_key[i] = prev_key[i] + grouptype_to_addition[group_to_grouptype[translator_4d[i][group]]][0] + (prev_key[24 + (i / 2)] * grouptype_to_addition[group_to_grouptype[translator_4d[i][group]]][1]);
+      next_key[i] = prev_key[i] + permtype_to_addition_4d[column][perm_to_permtype[translator_4d[group][i]]] + 
+            (prev_key[translator_4d[group][abcd_to_ab_cd[i][0]]] * permtype_to_addition_4d[column][perm_to_permtype[translator_4d[group][abcd_to_ab_cd[i][1]]]]);
    }
-   for (int i = 0; i < 12; i++) {
-      next_key[24 + i] = prev_key[24 + i] + grouptype_to_addition[group_to_grouptype[translator_4d[i * 2][group]]][2];
+   for (int i = 24; i < 36; i++) {
+      next_key[i] = prev_key[i] + permtype_to_addition_4d[column][perm_to_permtype[translator_4d[group][i]]];
    }
    btw_4d_key_t next_4d_key = make_tuple(next_key[ 0],
                                          next_key[ 1],
@@ -779,46 +804,6 @@ void path_finder_4d() {
                                                   current_flipped[translator_4d_backwards[translation][33]],
                                                   current_flipped[translator_4d_backwards[translation][34]],
                                                   current_flipped[translator_4d_backwards[translation][35]]);
-         if ((kv.first == make_tuple(274,230,256,284,314,274,266,262,274,266,278,274,248,280,278,226,278,310,262,266,274,266,274,266,18,18,18,18,18,17,18,18,18,18,19,18)) ||
-             (kv.first == make_tuple(266,274,278,274,274,266,262,266,278,274,274,266,262,266,274,266,274,266,266,262,278,262,278,274,18,18,18,18,18,18,18,18,18,18,18,18))) {
-            cout << translation << " ";
-            cout << "((" << get< 0>(translated_key);
-            cout <<  "," << get< 1>(translated_key);
-            cout <<  "," << get< 2>(translated_key);
-            cout <<  "," << get< 3>(translated_key);
-            cout <<  "," << get< 4>(translated_key);
-            cout <<  "," << get< 5>(translated_key);
-            cout <<  "," << get< 6>(translated_key);
-            cout <<  "," << get< 7>(translated_key);
-            cout <<  "," << get< 8>(translated_key);
-            cout <<  "," << get< 9>(translated_key);
-            cout <<  "," << get<10>(translated_key);
-            cout <<  "," << get<11>(translated_key);
-            cout <<  "," << get<12>(translated_key);
-            cout <<  "," << get<13>(translated_key);
-            cout <<  "," << get<14>(translated_key);
-            cout <<  "," << get<15>(translated_key);
-            cout <<  "," << get<16>(translated_key);
-            cout <<  "," << get<17>(translated_key);
-            cout <<  "," << get<18>(translated_key);
-            cout <<  "," << get<19>(translated_key);
-            cout <<  "," << get<20>(translated_key);
-            cout <<  "," << get<21>(translated_key);
-            cout <<  "," << get<22>(translated_key);
-            cout <<  "," << get<23>(translated_key);
-            cout << ")(" << get<24>(translated_key);
-            cout <<  "," << get<25>(translated_key);
-            cout <<  "," << get<26>(translated_key);
-            cout <<  "," << get<27>(translated_key);
-            cout <<  "," << get<28>(translated_key);
-            cout <<  "," << get<29>(translated_key);
-            cout <<  "," << get<30>(translated_key);
-            cout <<  "," << get<31>(translated_key);
-            cout <<  "," << get<32>(translated_key);
-            cout <<  "," << get<33>(translated_key);
-            cout <<  "," << get<34>(translated_key);
-            cout <<  "," << get<35>(translated_key) << "))\n";
-         }
          if (btw_map_4d[HALF_COLS - 1].find(translated_key) != btw_map_4d[HALF_COLS - 1].end()) {
             joining_4d[kv.first].push_back(make_tuple(translated_key, translation));
          }
@@ -1098,10 +1083,8 @@ void print_answers_4d(bool only_count) {
       // ^should be able to parallelize this for loop
       front_base = meeting.first;
       vector<string> front_solutions = recursive_print_answers_4d(HALF_COLS - 1, front_base, "", -1);
-      cout << "front base assigned. size: "<< front_solutions.size() <<"\n";
       for (auto shuffle_qp : meeting.second) {
          vector<string> back_solutions = recursive_print_answers_4d(HALF_COLS - 1, get<0>(shuffle_qp), "", get<1>(shuffle_qp));
-         cout << "back base assigned. size: "<< back_solutions.size() <<"\n";
          if (!only_count) {
             for (auto fs : front_solutions) {
                for (auto bs : back_solutions) {
@@ -1130,9 +1113,9 @@ int main() {
    #endif
    #ifdef FOUR_D
       path_finder_4d();
-      print_path_search_4d(true); // true for just number of solutions
+      print_path_search_4d(false); // true for just number of solutions
       make_answer_tree_4d();
       print_answer_tree_4d(true); // true for just search width
-      print_answers_4d(false); // true for just number of solutions
+      print_answers_4d(true); // true for just number of solutions
    #endif
 }
