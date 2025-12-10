@@ -8,7 +8,7 @@
 #include <set>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6, SEARCH_4d12, SEARCH_4d18
-#define SEARCH_4d6
+#define SEARCH_4d12
 
 using namespace std;
 
@@ -21,7 +21,7 @@ static string get_group_4d[24] = {"abcd", "abdc", "acbd", "acdb", "adbc", "adcb"
    #define SEARCH_3d6
    #define MAX_SHARE_4d 39 // for normalized
    //#define MAX_SHARE_4d (N * N * N * N / 24) // fwiw this is wrong
-   #define MAX_SHARE_4d_2d 9
+   #define MAX_SHARE_4d_2d 3
 #endif
 
 #ifdef SEARCH_4d12
@@ -30,7 +30,7 @@ static string get_group_4d[24] = {"abcd", "abdc", "acbd", "acdb", "adbc", "adcb"
    #define MAX_SHARE_4d 369 // for normalized
    //#define MAX_SHARE_4d (N * N * N * N / 24)
    //#define MAX_SHARE_4d 1033
-   #define MAX_SHARE_4d_2d 36
+   #define MAX_SHARE_4d_2d 6
 #endif
 
 #ifdef SEARCH_4d18
@@ -152,6 +152,30 @@ int translator_4d_2d[24][12] = {{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11}
                                 {11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0}};
 int translator_4d_2d_backwards[24][12];
 int permtype_to_addition_4d[HALF_COLS][10];
+int abcd_to_ab_cd[24][2] = {{24, 32},
+                            {24, 35},
+                            {25, 29},
+                            {25, 34},
+                            {26, 28},
+                            {26, 31},
+                            {27, 32},
+                            {27, 35},
+                            {28, 26},
+                            {28, 33},
+                            {29, 25},
+                            {29, 30},
+                            {30, 29},
+                            {30, 34},
+                            {31, 26},
+                            {31, 33},
+                            {32, 24},
+                            {32, 27},
+                            {33, 28},
+                            {33, 31},
+                            {34, 25},
+                            {34, 30},
+                            {35, 24},
+                            {35, 27}};
 
 
 int sum_things(int thing) {
@@ -549,30 +573,6 @@ btw_4d_map_sols_t btw_map_solutions_4d[HALF_COLS - 1];
 btw_4d_key_t get_next_key_4d(btw_4d_key_t prev_4d_key, int group, int column) {
    // group = 0, index is perm
    int perm_to_permtype[36] = {7, 5, 3, 5, 3, 1, 6, 4, 3, 5, 3, 1, 6, 4, 2, 4, 3, 1, 6, 4, 2, 4, 2, 0, 9, 9, 9, 8, 9, 9, 8, 8, 9, 8, 8, 8};
-   int abcd_to_ab_cd[24][2] = {{24, 32},
-                               {24, 35},
-                               {25, 29},
-                               {25, 34},
-                               {26, 28},
-                               {26, 31},
-                               {27, 32},
-                               {27, 35},
-                               {28, 26},
-                               {28, 33},
-                               {29, 25},
-                               {29, 30},
-                               {30, 29},
-                               {30, 34},
-                               {31, 26},
-                               {31, 33},
-                               {32, 24},
-                               {32, 27},
-                               {33, 28},
-                               {33, 31},
-                               {34, 25},
-                               {34, 30},
-                               {35, 24},
-                               {35, 27}};
    // [perm][group]
    int prev_key[36];
    int next_key[36];
@@ -722,50 +722,57 @@ void path_finder_4d() {
       }
    }
 
+   int current[36];
    int current_flipped[36];
    for (auto kv : btw_map_4d[HALF_COLS - 1]) {
       // ^should be able to parallelize this for loop
-      current_flipped[ 0] = MAX_SHARE_4d - get< 0>(kv.first);
-      current_flipped[ 1] = MAX_SHARE_4d - get< 1>(kv.first);
-      current_flipped[ 2] = MAX_SHARE_4d - get< 2>(kv.first);
-      current_flipped[ 3] = MAX_SHARE_4d - get< 3>(kv.first);
-      current_flipped[ 4] = MAX_SHARE_4d - get< 4>(kv.first);
-      current_flipped[ 5] = MAX_SHARE_4d - get< 5>(kv.first);
-      current_flipped[ 6] = MAX_SHARE_4d - get< 6>(kv.first);
-      current_flipped[ 7] = MAX_SHARE_4d - get< 7>(kv.first);
-      current_flipped[ 8] = MAX_SHARE_4d - get< 8>(kv.first);
-      current_flipped[ 9] = MAX_SHARE_4d - get< 9>(kv.first);
-      current_flipped[10] = MAX_SHARE_4d - get<10>(kv.first);
-      current_flipped[11] = MAX_SHARE_4d - get<11>(kv.first);
-      current_flipped[12] = MAX_SHARE_4d - get<12>(kv.first);
-      current_flipped[13] = MAX_SHARE_4d - get<13>(kv.first);
-      current_flipped[14] = MAX_SHARE_4d - get<14>(kv.first);
-      current_flipped[15] = MAX_SHARE_4d - get<15>(kv.first);
-      current_flipped[16] = MAX_SHARE_4d - get<16>(kv.first);
-      current_flipped[17] = MAX_SHARE_4d - get<17>(kv.first);
-      current_flipped[18] = MAX_SHARE_4d - get<18>(kv.first);
-      current_flipped[19] = MAX_SHARE_4d - get<19>(kv.first);
-      current_flipped[20] = MAX_SHARE_4d - get<20>(kv.first);
-      current_flipped[21] = MAX_SHARE_4d - get<21>(kv.first);
-      current_flipped[22] = MAX_SHARE_4d - get<22>(kv.first);
-      current_flipped[23] = MAX_SHARE_4d - get<23>(kv.first);
-      current_flipped[24] = MAX_SHARE_4d_2d - get<24>(kv.first);
-      current_flipped[25] = MAX_SHARE_4d_2d - get<25>(kv.first);
-      current_flipped[26] = MAX_SHARE_4d_2d - get<26>(kv.first);
-      current_flipped[27] = MAX_SHARE_4d_2d - get<27>(kv.first);
-      current_flipped[28] = MAX_SHARE_4d_2d - get<28>(kv.first);
-      current_flipped[29] = MAX_SHARE_4d_2d - get<29>(kv.first);
-      current_flipped[30] = MAX_SHARE_4d_2d - get<30>(kv.first);
-      current_flipped[31] = MAX_SHARE_4d_2d - get<31>(kv.first);
-      current_flipped[32] = MAX_SHARE_4d_2d - get<32>(kv.first);
-      current_flipped[33] = MAX_SHARE_4d_2d - get<33>(kv.first);
-      current_flipped[34] = MAX_SHARE_4d_2d - get<34>(kv.first);
-      current_flipped[35] = MAX_SHARE_4d_2d - get<35>(kv.first);
-      for (int i = 0; i < 12; i++) {
-         current_flipped[has_2d_in_4d[i][0]] -= ((MAX_SHARE_4d_2d / 2) - current_flipped[24 + i]) * (MAX_SHARE_4d_2d / 2);
-         current_flipped[has_2d_in_4d[i][1]] -= ((MAX_SHARE_4d_2d / 2) - current_flipped[24 + i]) * (MAX_SHARE_4d_2d / 2);
-         current_flipped[has_2d_in_4d[i][2]] += ((MAX_SHARE_4d_2d / 2) - current_flipped[24 + i]) * (MAX_SHARE_4d_2d / 2);
-         current_flipped[has_2d_in_4d[i][3]] += ((MAX_SHARE_4d_2d / 2) - current_flipped[24 + i]) * (MAX_SHARE_4d_2d / 2);
+      current[ 0] = get< 0>(kv.first);
+      current[ 1] = get< 1>(kv.first);
+      current[ 2] = get< 2>(kv.first);
+      current[ 3] = get< 3>(kv.first);
+      current[ 4] = get< 4>(kv.first);
+      current[ 5] = get< 5>(kv.first);
+      current[ 6] = get< 6>(kv.first);
+      current[ 7] = get< 7>(kv.first);
+      current[ 8] = get< 8>(kv.first);
+      current[ 9] = get< 9>(kv.first);
+      current[10] = get<10>(kv.first);
+      current[11] = get<11>(kv.first);
+      current[12] = get<12>(kv.first);
+      current[13] = get<13>(kv.first);
+      current[14] = get<14>(kv.first);
+      current[15] = get<15>(kv.first);
+      current[16] = get<16>(kv.first);
+      current[17] = get<17>(kv.first);
+      current[18] = get<18>(kv.first);
+      current[19] = get<19>(kv.first);
+      current[20] = get<20>(kv.first);
+      current[21] = get<21>(kv.first);
+      current[22] = get<22>(kv.first);
+      current[23] = get<23>(kv.first);
+      current[24] = get<24>(kv.first);
+      current[25] = get<25>(kv.first);
+      current[26] = get<26>(kv.first);
+      current[27] = get<27>(kv.first);
+      current[28] = get<28>(kv.first);
+      current[29] = get<29>(kv.first);
+      current[30] = get<30>(kv.first);
+      current[31] = get<31>(kv.first);
+      current[32] = get<32>(kv.first);
+      current[33] = get<33>(kv.first);
+      current[34] = get<34>(kv.first);
+      current[35] = get<35>(kv.first);
+      int additions = 0;
+      for (int i = 0; i < 24; i++) {
+         current[i] += current[abcd_to_ab_cd[i][0]] * (MAX_SHARE_4d_2d - current[abcd_to_ab_cd[i][1]]);
+         additions += current[abcd_to_ab_cd[i][0]] * (MAX_SHARE_4d_2d - current[abcd_to_ab_cd[i][1]]);
+      }
+      cout << "additions: " << additions << "\n";
+      for (int i = 0; i < 24; i++) {
+         current_flipped[i] = MAX_SHARE_4d - current[i];
+      }
+      for (int i = 24; i < 36; i++) {
+         current_flipped[i] = MAX_SHARE_4d_2d - current[i];
       }
       for (int translation = 0; translation < 24; translation++) {
          btw_4d_key_t translated_key = make_tuple(current_flipped[translator_4d_backwards[translation][ 0]],
@@ -1113,7 +1120,7 @@ int main() {
    #endif
    #ifdef FOUR_D
       path_finder_4d();
-      print_path_search_4d(false); // true for just number of solutions
+      print_path_search_4d(true); // true for just number of solutions
       make_answer_tree_4d();
       print_answer_tree_4d(true); // true for just search width
       print_answers_4d(true); // true for just number of solutions
