@@ -28,8 +28,6 @@ static string get_group_4d[24] = {"abcd", "abdc", "acbd", "acdb", "adbc", "adcb"
    #define FOUR_D
    #define SEARCH_3d12
    #define MAX_SHARE_4d 369 // for normalized
-   //#define MAX_SHARE_4d (N * N * N * N / 24)
-   //#define MAX_SHARE_4d 1033
    #define MAX_SHARE_4d_2d 6
 #endif
 
@@ -37,7 +35,7 @@ static string get_group_4d[24] = {"abcd", "abdc", "acbd", "acdb", "adbc", "adcb"
    #define FOUR_D
    #define SEARCH_3d18
    #define MAX_SHARE_4d 1314 // for normalized
-   #define MAX_SHARE_4d_2d 81
+   #define MAX_SHARE_4d_2d 9
 #endif
 
 #ifdef SEARCH_3d6
@@ -203,13 +201,13 @@ void initialize_stuff() {
    for (int m = 0; m < HALF_COLS; m++) {
       int n = (HALF_COLS * 2) - m - 1;
       permtype_to_addition_4d[m][0] = 0;
-      permtype_to_addition_4d[m][1] = sum_things(m - 1);
-      permtype_to_addition_4d[m][2] = sum_things(n - 1);
+      permtype_to_addition_4d[m][1] = sum_things(n - 1);
+      permtype_to_addition_4d[m][2] = sum_things(m - 1);
       permtype_to_addition_4d[m][3] = permtype_to_addition_4d[m][1] + permtype_to_addition_4d[m][2];
       permtype_to_addition_4d[m][4] = m * n;
-      permtype_to_addition_4d[m][5] = permtype_to_addition_4d[m][4] + sum_things(m);
-      permtype_to_addition_4d[m][6] = permtype_to_addition_4d[m][4] + sum_things(n);
-      permtype_to_addition_4d[m][7] = 1 + permtype_to_addition_4d[m][4] + sum_things(m) + sum_things(n);
+      permtype_to_addition_4d[m][5] = permtype_to_addition_4d[m][4] + sum_things(n);
+      permtype_to_addition_4d[m][6] = permtype_to_addition_4d[m][4] + sum_things(m);
+      permtype_to_addition_4d[m][7] = 1 + permtype_to_addition_4d[m][4] + sum_things(n) + sum_things(m);
       permtype_to_addition_4d[m][8] = 0;
       permtype_to_addition_4d[m][9] = 1;
    }
@@ -612,12 +610,20 @@ btw_4d_key_t get_next_key_4d(btw_4d_key_t prev_4d_key, int group, int column) {
    prev_key[33] = get<33>(prev_4d_key);
    prev_key[34] = get<34>(prev_4d_key);
    prev_key[35] = get<35>(prev_4d_key);
+   //cout << "column: " << column << ": ";
    for (int i = 0; i < 24; i++) {
       next_key[i] = prev_key[i] + permtype_to_addition_4d[column][perm_to_permtype[translator_4d[group][i]]] + 
-            (prev_key[translator_4d[group][abcd_to_ab_cd[i][0]]] * permtype_to_addition_4d[column][perm_to_permtype[translator_4d[group][abcd_to_ab_cd[i][1]]]]);
+            (prev_key[abcd_to_ab_cd[i][0]] * permtype_to_addition_4d[column][perm_to_permtype[translator_4d[group][abcd_to_ab_cd[i][1]]]]);
+      //cout << prev_key[abcd_to_ab_cd[i][0]] << "*" << permtype_to_addition_4d[column][perm_to_permtype[translator_4d[group][abcd_to_ab_cd[i][1]]]] << ", ";
    }
+   //cout << "\n";
    for (int i = 24; i < 36; i++) {
       next_key[i] = prev_key[i] + permtype_to_addition_4d[column][perm_to_permtype[translator_4d[group][i]]];
+   }
+   for (int i = 0; i < 24; i++) {
+      if (next_key[i] > MAX_SHARE_4d) {
+         cout << "too big!\n";
+      }
    }
    btw_4d_key_t next_4d_key = make_tuple(next_key[ 0],
                                          next_key[ 1],
@@ -695,6 +701,14 @@ void path_finder_4d() {
                               {18, 19,  9, 15}, // da
                               {20, 21,  3, 13}, // db
                               {22, 23,  1,  7}};// dc
+   // abcd dcba cbad dabc dbca acbd           dbac cabd cbad dabc abdc cdba
+   //         abdc cdba cbad dabc dbac cabd 
+   // abcd dcba dbac cabd cbad dabc // backwards
+   //int test_groups[6]  = {0, 23, 14, 18, 21, 2}; //
+   //int test_groups[6] = {0, 23, 20, 12, 14, 18}; //
+   // abcd dcba cbad dabc dbca acbd       dbca acbd cbad dabc abcd dcba
+   // abcd dcba cbad dabc dbca acbd
+   //int test_groups[12] = {0, 23, 14, 18, 21, 2, 21, 2, 14, 18, 0, 23}; //
    btw_3d_key_t next_3d_key = make_tuple(N, N - 1, 0, N - 1, 0, 0);
    btw_4d_key_t next_4d_key = get_next_key_4d(make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0, 0);
    btw_map_4d_3d[0][next_4d_key].insert(make_tuple(next_3d_key, next_3d_key, next_3d_key, next_3d_key));
@@ -708,6 +722,7 @@ void path_finder_4d() {
                   good &= (btw_map_solutions[between - 1][get<1>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][0]) != btw_map_solutions[between - 1][get<0>(set_3d)].end());
                   good &= (btw_map_solutions[between - 1][get<2>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][1]) != btw_map_solutions[between - 1][get<0>(set_3d)].end());
                   good &= (btw_map_solutions[between - 1][get<3>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][2]) != btw_map_solutions[between - 1][get<0>(set_3d)].end());
+                  //good &= combine_3d_to_4d[abc_option.first][i][3] == test_groups[between]; //
                   if (good) {
                      next_4d_key = get_next_key_4d(kv.first, combine_3d_to_4d[abc_option.first][i][3], between);
                      btw_map_4d_3d[between][next_4d_key].insert(make_tuple(btw_map_solutions[between - 1][get<0>(set_3d)][abc_option.first],
@@ -762,19 +777,34 @@ void path_finder_4d() {
       current[33] = get<33>(kv.first);
       current[34] = get<34>(kv.first);
       current[35] = get<35>(kv.first);
-      int additions = 0;
       for (int i = 0; i < 24; i++) {
          current[i] += current[abcd_to_ab_cd[i][0]] * (MAX_SHARE_4d_2d - current[abcd_to_ab_cd[i][1]]);
-         additions += current[abcd_to_ab_cd[i][0]] * (MAX_SHARE_4d_2d - current[abcd_to_ab_cd[i][1]]);
       }
-      cout << "additions: " << additions << "\n";
       for (int i = 0; i < 24; i++) {
          current_flipped[i] = MAX_SHARE_4d - current[i];
       }
       for (int i = 24; i < 36; i++) {
          current_flipped[i] = MAX_SHARE_4d_2d - current[i];
       }
+      //cout << "((";
+      //for (int i = 0; i < 24; i++) {
+      //   cout << current_flipped[i] << ",";
+      //}
+      //cout << ")(";
+      //for (int i = 24; i < 36; i++) {
+      //   cout << current_flipped[i] << ",";
+      //}
+      //cout << "))\n";
       for (int translation = 0; translation < 24; translation++) {
+         //cout << "  " << translation << " ((";
+         //for (int i = 0; i < 24; i++) {
+         //   cout << current_flipped[translator_4d_backwards[translation][i]] << ",";
+         //}
+         //cout << ")(";
+         //for (int i = 24; i < 36; i++) {
+         //   cout << current_flipped[translator_4d_backwards[translation][i]] << ",";
+         //}
+         //cout << "))\n";
          btw_4d_key_t translated_key = make_tuple(current_flipped[translator_4d_backwards[translation][ 0]],
                                                   current_flipped[translator_4d_backwards[translation][ 1]],
                                                   current_flipped[translator_4d_backwards[translation][ 2]],
