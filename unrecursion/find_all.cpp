@@ -8,7 +8,7 @@
 #include <set>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6, SEARCH_4d12, SEARCH_4d18
-#define SEARCH_3d6
+#define SEARCH_3d18
 
 using namespace std;
 
@@ -353,7 +353,7 @@ void path_finder_3d() {
    btw_map[0][get_key_from_perms(0, make_tuple(N, N - 1, 0, N - 1, 0, 0))].push_back(make_tuple(0, 0));
    for (int between = 1; between < HALF_COLS; between++) {
       for (auto kv : btw_map[between - 1]) {
-         btw_3d_key_t kv_first = key_perms_map[between][kv.first];
+         btw_3d_key_t kv_first = key_perms_map[between - 1][kv.first];
          // ^should be able to parallelize this for loop
          for (int group = 0; group < 6; group++) {
             if ((paths[between][get<0>(kv_first)][group_to_grouptype[group][0]] > -1) &&
@@ -1163,12 +1163,12 @@ int main() {
    #ifdef THREE_D
       initialize_stuff();
       path_maker_3d();
-      print_path_3d();
+      //print_path_3d();
       path_finder_3d();
-      print_path_search_3d(false); // true for just number of solutions
-      print_answers_3d(false); // true for just number of solutions
-      make_answer_tree_3d();
-      print_answer_tree_3d(false); // true for just search width
+      //print_path_search_3d(true); // true for just number of solutions
+      print_answers_3d(true); // true for just number of solutions
+      //make_answer_tree_3d();
+      //print_answer_tree_3d(true); // true for just search width
    #endif
    #ifdef FOUR_D
       path_finder_4d();
