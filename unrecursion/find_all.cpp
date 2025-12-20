@@ -8,7 +8,7 @@
 #include <set>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6, SEARCH_4d12, SEARCH_4d18
-#define SEARCH_4d12
+#define SEARCH_3d12
 
 using namespace std;
 
@@ -237,6 +237,7 @@ struct key_equal : public binary_function<btw_3d_key_t, btw_3d_key_t, size_t> {
 };
 
 typedef unordered_map<const btw_3d_key_t, btw_3d_data_t, key_hash, key_equal> btw_3d_map_t;
+typedef unordered_map<const btw_3d_key_t, int, key_hash, key_equal> btw_key_3d_map_t;
 typedef unordered_map<const btw_3d_key_t, unordered_map<int, btw_3d_key_t>, key_hash, key_equal> btw_3d_map_sols_t;
 
 
@@ -494,6 +495,35 @@ void print_answer_tree_3d(bool only_count) {
          cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ")  ";
       }
       cout << "\n\n";
+   }
+}
+
+// write answer tree
+// (doesn't write joining)
+void write_answer_tree_3d() {
+   btw_key_3d_map_t translate_key[HALF_COLS];
+   int num_branches = 0;
+   for (auto kv : btw_map_solutions[0]) {
+      if (translate_key[0].find(kv.first) == translate_key[0].end()) {
+         translate_key[0][kv.first] = num_branches;
+         num_branches++;
+      }
+   }
+   for (int between = 0; between < HALF_COLS - 1; between++) {
+      cout << "c" << between << "\n";
+      num_branches = 0;
+      for (auto kv : btw_map_solutions[between]) {
+         cout << "b" << translate_key[between][kv.first] << "-";
+         for (auto kg : kv.second) {
+            cout << kg.first << ":";
+            if (translate_key[between + 1].find(kg.second) == translate_key[between + 1].end()) {
+               translate_key[between + 1][kg.second] = num_branches;
+               num_branches++;
+            }
+            cout << translate_key[between + 1][kg.second] << ",";
+         }
+         cout << "\n";
+      }
    }
 }
 
@@ -1147,6 +1177,7 @@ int main() {
       print_answers_3d(true); // true for just number of solutions
       make_answer_tree_3d();
       print_answer_tree_3d(true); // true for just search width
+      write_answer_tree_3d();
    #endif
    #ifdef FOUR_D
       path_finder_4d();
