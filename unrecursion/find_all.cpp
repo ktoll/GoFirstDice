@@ -8,7 +8,7 @@
 #include <set>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6, SEARCH_4d12, SEARCH_4d18
-#define SEARCH_4d12
+#define SEARCH_3d6
 
 using namespace std;
 
@@ -217,7 +217,7 @@ void initialize_stuff() {
 // 3d ----------------------------------------------------------------------------------------------
 // between tuple struct map queue stuff
 typedef tuple<int, int, int, int, int, int> btw_3d_key_t;
-typedef deque<tuple<btw_3d_key_t, int>> btw_3d_data_t; // perms, then group
+typedef deque<tuple<int, int>> btw_3d_data_t; // perms_key, then group
 
 struct key_hash : public unary_function<btw_3d_key_t, size_t> {
    size_t operator()(const btw_3d_key_t& k) const {
@@ -236,12 +236,17 @@ struct key_equal : public binary_function<btw_3d_key_t, btw_3d_key_t, size_t> {
    }
 };
 
-typedef unordered_map<const btw_3d_key_t, btw_3d_data_t, key_hash, key_equal> btw_3d_map_t;
-typedef unordered_map<const btw_3d_key_t, unordered_map<int, btw_3d_key_t>, key_hash, key_equal> btw_3d_map_sols_t;
+typedef unordered_map<const btw_3d_key_t, int, key_hash, key_equal> perms_key_3d_map_t;
+typedef unordered_map<int, btw_3d_key_t> key_perms_3d_map_t;
+typedef unordered_map<int, btw_3d_data_t> btw_3d_map_t;
+typedef unordered_map<int, unordered_map<int, int>> btw_3d_map_sols_t; // unordered_map<group, perms_key>
 
 
 // global variables
 int paths[HALF_COLS][NUM_SHARES][4];
+perms_key_3d_map_t perms_key_map[HALF_COLS];
+key_perms_3d_map_t key_perms_map[HALF_COLS];
+int num_perms[HALF_COLS] = {0};
 btw_3d_map_t btw_map[HALF_COLS];
 btw_3d_map_t joining;
 btw_3d_map_sols_t btw_map_solutions[HALF_COLS - 1];
@@ -329,6 +334,15 @@ void print_path_3d() {
 
 
 // path searching
+int get_key_from_perms(int between, btw_3d_key_t perms) {
+   if (perms_key_map[between].find(perms) == perms_key_map[between].end()) {
+      perms_key_map[between][perms] = num_perms[between];
+      key_perms_map[between][num_perms[between]] = perms;
+      num_perms[between]++;
+   }
+   return perms_key_map[between][perms];
+}
+
 void path_finder_3d() {
    int group_to_grouptype[6][6] = {{3, 2, 1, 2, 1, 0},
                                    {2, 3, 1, 0, 1, 2},
@@ -336,36 +350,38 @@ void path_finder_3d() {
                                    {1, 0, 2, 3, 2, 1},
                                    {2, 1, 0, 1, 3, 2},
                                    {0, 1, 2, 1, 2, 3}};
-   btw_map[0][make_tuple(N, N - 1, 0, N - 1, 0, 0)].push_back(make_tuple(make_tuple(0, 0, 0, 0, 0, 0), 0));
+   btw_map[0][get_key_from_perms(0, make_tuple(N, N - 1, 0, N - 1, 0, 0))].push_back(make_tuple(0, 0));
    for (int between = 1; between < HALF_COLS; between++) {
       for (auto kv : btw_map[between - 1]) {
+         btw_3d_key_t kv_first = key_perms_map[between][kv.first];
          // ^should be able to parallelize this for loop
          for (int group = 0; group < 6; group++) {
-            if ((paths[between][get<0>(kv.first)][group_to_grouptype[group][0]] > -1) &&
-                (paths[between][get<1>(kv.first)][group_to_grouptype[group][1]] > -1) &&
-                (paths[between][get<2>(kv.first)][group_to_grouptype[group][2]] > -1) &&
-                (paths[between][get<3>(kv.first)][group_to_grouptype[group][3]] > -1) &&
-                (paths[between][get<4>(kv.first)][group_to_grouptype[group][4]] > -1) &&
-                (paths[between][get<5>(kv.first)][group_to_grouptype[group][5]] > -1)) {
-               btw_map[between][make_tuple(paths[between][get<0>(kv.first)][group_to_grouptype[group][0]],
-                                           paths[between][get<1>(kv.first)][group_to_grouptype[group][1]],
-                                           paths[between][get<2>(kv.first)][group_to_grouptype[group][2]],
-                                           paths[between][get<3>(kv.first)][group_to_grouptype[group][3]],
-                                           paths[between][get<4>(kv.first)][group_to_grouptype[group][4]],
-                                           paths[between][get<5>(kv.first)][group_to_grouptype[group][5]])].push_back(make_tuple(kv.first, group));
+            if ((paths[between][get<0>(kv_first)][group_to_grouptype[group][0]] > -1) &&
+                (paths[between][get<1>(kv_first)][group_to_grouptype[group][1]] > -1) &&
+                (paths[between][get<2>(kv_first)][group_to_grouptype[group][2]] > -1) &&
+                (paths[between][get<3>(kv_first)][group_to_grouptype[group][3]] > -1) &&
+                (paths[between][get<4>(kv_first)][group_to_grouptype[group][4]] > -1) &&
+                (paths[between][get<5>(kv_first)][group_to_grouptype[group][5]] > -1)) {
+               btw_map[between][get_key_from_perms(between, make_tuple(paths[between][get<0>(kv_first)][group_to_grouptype[group][0]],
+                                                                       paths[between][get<1>(kv_first)][group_to_grouptype[group][1]],
+                                                                       paths[between][get<2>(kv_first)][group_to_grouptype[group][2]],
+                                                                       paths[between][get<3>(kv_first)][group_to_grouptype[group][3]],
+                                                                       paths[between][get<4>(kv_first)][group_to_grouptype[group][4]],
+                                                                       paths[between][get<5>(kv_first)][group_to_grouptype[group][5]]))].push_back(make_tuple(kv.first, group));
             }
          }
       }
    }
    int current_flipped[6];
    for (auto kv : btw_map[HALF_COLS - 1]) {
+      btw_3d_key_t kv_first = key_perms_map[HALF_COLS - 1][kv.first];
       // ^should be able to parallelize this for loop
-      current_flipped[0] = MAX_SHARE - get<0>(kv.first);
-      current_flipped[1] = MAX_SHARE - get<1>(kv.first);
-      current_flipped[2] = MAX_SHARE - get<2>(kv.first);
-      current_flipped[3] = MAX_SHARE - get<3>(kv.first);
-      current_flipped[4] = MAX_SHARE - get<4>(kv.first);
-      current_flipped[5] = MAX_SHARE - get<5>(kv.first);
+      current_flipped[0] = MAX_SHARE - get<0>(kv_first);
+      current_flipped[1] = MAX_SHARE - get<1>(kv_first);
+      current_flipped[2] = MAX_SHARE - get<2>(kv_first);
+      current_flipped[3] = MAX_SHARE - get<3>(kv_first);
+      current_flipped[4] = MAX_SHARE - get<4>(kv_first);
+      current_flipped[5] = MAX_SHARE - get<5>(kv_first);
       //current_flipped[0] = MAX_SHARE - get<5>(kv.first);
       //current_flipped[1] = MAX_SHARE - get<3>(kv.first);
       //current_flipped[2] = MAX_SHARE - get<4>(kv.first);
@@ -379,8 +395,8 @@ void path_finder_3d() {
                                                   current_flipped[translator[translation][3]],
                                                   current_flipped[translator[translation][4]],
                                                   current_flipped[translator[translation][5]]);
-         if (btw_map[HALF_COLS - 1].find(translated_key) != btw_map[HALF_COLS - 1].end()) {
-            joining[kv.first].push_back(make_tuple(translated_key, translation));
+         if (perms_key_map[HALF_COLS - 1].find(translated_key) != perms_key_map[HALF_COLS - 1].end()) {
+            joining[kv.first].push_back(make_tuple(perms_key_map[HALF_COLS - 1][translated_key], translation));
          }
       }
    }
@@ -391,22 +407,26 @@ void path_finder_3d() {
 void print_path_search_3d(bool only_count) {
    cout << "path search 3d\n";
    for (int between = 0; between < HALF_COLS; between++) {
-      cout << "between columns " << between << " and " << between + 1 << " has " << btw_map[between].size() << "\n";
+      cout << "between columns " << between << " and " << between + 1 << " has " << num_perms[between] << "\n";
    }
    cout << "joining has " << joining.size() << "\n\n";
 
    if (!only_count) {
       for (int between = 0; between < HALF_COLS; between++) {
          for (auto kv : btw_map[between]) {
-            cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
+            //cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
+            cout << kv.first << " ";
          }
          cout << "\n\n";
       }
       for (auto kv : joining) {
-         cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") \n";
+         //cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") \n";
+         cout << kv.first << "->(";
          for (auto kg : kv.second) {
-            cout << "  " << get<1>(kg) << " (" << get<0>(get<0>(kg)) << ","  << get<1>(get<0>(kg)) << ","  << get<2>(get<0>(kg)) << ","  << get<3>(get<0>(kg)) << ","  << get<4>(get<0>(kg)) << ","  << get<5>(get<0>(kg)) << ") \n";
+            //cout << "  " << get<1>(kg) << " (" << get<0>(get<0>(kg)) << ","  << get<1>(get<0>(kg)) << ","  << get<2>(get<0>(kg)) << ","  << get<3>(get<0>(kg)) << ","  << get<4>(get<0>(kg)) << ","  << get<5>(get<0>(kg)) << ") \n";
+            cout << get<1>(kg) << " (" << get<0>(kg) << "),";
          }
+         cout << ")\n";
       }
       cout << "\n";
    }
@@ -414,7 +434,7 @@ void print_path_search_3d(bool only_count) {
 
 
 // answer printing
-vector<string> recursive_print_answers_3d(int depth, btw_3d_key_t base, string so_far, int translation) {
+vector<string> recursive_print_answers_3d(int depth, int base, string so_far, int translation) {
    vector<string> solutions = {};
    if (depth == -1) {
       solutions.push_back(so_far);
@@ -435,7 +455,7 @@ vector<string> recursive_print_answers_3d(int depth, btw_3d_key_t base, string s
 }
 
 void print_answers_3d(bool only_count) {
-   btw_3d_key_t front_base;
+   int front_base;
    int groups[N];
    int count = 0;
    for (auto meeting : joining) {
@@ -486,12 +506,14 @@ void print_answer_tree_3d(bool only_count) {
    if (!only_count) {
       for (int between = 0; between < HALF_COLS - 1; between++) {
          for (auto kv : btw_map_solutions[between]) {
-            cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
+            //cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ") ";
+            cout << kv.first << " ";
          }
          cout << "\n\n";
       }
       for (auto kv : joining) {
-         cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ")  ";
+         //cout << "(" << get<0>(kv.first) << ","  << get<1>(kv.first) << ","  << get<2>(kv.first) << ","  << get<3>(kv.first) << ","  << get<4>(kv.first) << ","  << get<5>(kv.first) << ")  ";
+         cout << kv.first << " ";
       }
       cout << "\n\n";
    }
@@ -1143,10 +1165,10 @@ int main() {
       path_maker_3d();
       print_path_3d();
       path_finder_3d();
-      print_path_search_3d(true); // true for just number of solutions
-      print_answers_3d(true); // true for just number of solutions
+      print_path_search_3d(false); // true for just number of solutions
+      print_answers_3d(false); // true for just number of solutions
       make_answer_tree_3d();
-      print_answer_tree_3d(true); // true for just search width
+      print_answer_tree_3d(false); // true for just search width
    #endif
    #ifdef FOUR_D
       path_finder_4d();
