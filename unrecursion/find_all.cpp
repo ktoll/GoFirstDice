@@ -6,9 +6,10 @@
 #include <unordered_map>
 #include <deque>
 #include <set>
+#include <fstream>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6, SEARCH_4d12, SEARCH_4d18
-#define SEARCH_3d12
+#define SEARCH_3d6
 
 using namespace std;
 
@@ -501,6 +502,7 @@ void print_answer_tree_3d(bool only_count) {
 // write answer tree
 // (doesn't write joining)
 void write_answer_tree_3d() {
+   ofstream output_file("3d" + std::to_string(N) + "_answer_tree.txt");
    btw_key_3d_map_t translate_key[HALF_COLS];
    int num_branches = 0;
    for (auto kv : btw_map_solutions[0]) {
@@ -510,21 +512,22 @@ void write_answer_tree_3d() {
       }
    }
    for (int between = 0; between < HALF_COLS - 1; between++) {
-      cout << "c" << between << "\n";
+      output_file << "c" << between << "\n";
       num_branches = 0;
       for (auto kv : btw_map_solutions[between]) {
-         cout << "b" << translate_key[between][kv.first] << "-";
+         output_file << "b" << translate_key[between][kv.first] << "-";
          for (auto kg : kv.second) {
-            cout << kg.first << ":";
+            output_file << kg.first << ":";
             if (translate_key[between + 1].find(kg.second) == translate_key[between + 1].end()) {
                translate_key[between + 1][kg.second] = num_branches;
                num_branches++;
             }
-            cout << translate_key[between + 1][kg.second] << ",";
+            output_file << translate_key[between + 1][kg.second] << ",";
          }
-         cout << "\n";
+         output_file << "\n";
       }
    }
+   output_file.close();
 }
 
 // 4d ----------------------------------------------------------------------------------------------
