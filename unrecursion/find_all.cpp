@@ -7,9 +7,10 @@
 #include <deque>
 #include <set>
 #include <fstream>
+#include <sstream>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6, SEARCH_4d12, SEARCH_4d18
-#define SEARCH_3d6
+#define SEARCH_4d18
 
 using namespace std;
 
@@ -589,8 +590,9 @@ struct key_equal_4d : public binary_function<btw_4d_key_t, btw_4d_key_t, size_t>
 };
 
 typedef unordered_map<const btw_4d_key_t, btw_4d_data_t, key_hash_4d, key_equal_4d> btw_4d_map_t;
-typedef unordered_map<const btw_4d_key_t, set<tuple<btw_3d_key_t, btw_3d_key_t, btw_3d_key_t, btw_3d_key_t>>, key_hash_4d, key_equal_4d> btw_4d_to_btw_3d_t;
+typedef unordered_map<const btw_4d_key_t, set<tuple<int, int, int, int>>, key_hash_4d, key_equal_4d> btw_4d_to_btw_3d_t;
 typedef unordered_map<const btw_4d_key_t, unordered_map<int, btw_4d_key_t>, key_hash_4d, key_equal_4d> btw_4d_map_sols_t;
+typedef unordered_map<int, unordered_map<int, int>> btw_3d_int_sols_t; // var[key][group] = key
 
 
 // global variables
@@ -598,7 +600,54 @@ btw_4d_map_t btw_map_4d[HALF_COLS];
 btw_4d_to_btw_3d_t btw_map_4d_3d[HALF_COLS];
 btw_4d_map_t joining_4d;
 btw_4d_map_sols_t btw_map_solutions_4d[HALF_COLS - 1];
+btw_3d_int_sols_t btw_int_solutions_3d[HALF_COLS - 1];
 
+// read 3d answer tree
+void read_answer_tree_3d() {
+   ifstream input_file("3d" + std::to_string(N) + "_answer_tree.txt");
+   string line;
+   int between = -1;
+   char c;
+   char dash;
+   char comma;
+   char colon;
+   int key;
+   int group;
+   int next_key;
+   while (getline(input_file, line)) {
+      istringstream iss(line);
+      if (iss >> c) {
+         if (c == 'c') {
+            between++;
+         }
+         else if (c == 'b') {
+            iss >> key;
+            iss >> dash;
+            while (iss >> group >> colon >> next_key >> comma) {
+               btw_int_solutions_3d[between][key][group] = next_key;
+            }
+         }
+      }
+   }
+}
+
+// print answer tree
+void print_answer_tree_3d_4d(bool only_count) {
+   cout << "\n3d answer tree:\n";
+   for (int between = 0; between < HALF_COLS - 1; between++) {
+      cout << "between columns " << between << " and " << between + 1 << " has " << btw_int_solutions_3d[between].size() << "\n";
+   }
+   cout << "\n";
+
+   if (!only_count) {
+      for (int between = 0; between < HALF_COLS - 1; between++) {
+         for (auto kv : btw_int_solutions_3d[between]) {
+            cout << kv.first << ", ";
+         }
+         cout << "\n\n";
+      }
+   }
+}
 
 // path searching
 btw_4d_key_t get_next_key_4d(btw_4d_key_t prev_4d_key, int group, int column) {
@@ -742,26 +791,25 @@ void path_finder_4d() {
    // abcd dcba cbad dabc dbca acbd       dbca acbd cbad dabc abcd dcba
    // abcd dcba cbad dabc dbca acbd
    //int test_groups[12] = {0, 23, 14, 18, 21, 2, 21, 2, 14, 18, 0, 23}; //
-   btw_3d_key_t next_3d_key = make_tuple(N, N - 1, 0, N - 1, 0, 0);
    btw_4d_key_t next_4d_key = get_next_key_4d(make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0, 0);
-   btw_map_4d_3d[0][next_4d_key].insert(make_tuple(next_3d_key, next_3d_key, next_3d_key, next_3d_key));
+   btw_map_4d_3d[0][next_4d_key].insert(make_tuple(0, 0, 0, 0));
    btw_map_4d[0][next_4d_key].push_back(make_tuple(make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0));
    for (int between = 1; between < HALF_COLS; between++) {
       for (auto kv : btw_map_4d[between - 1]) {
          for (auto set_3d : btw_map_4d_3d[between - 1][kv.first]) {
-            for (auto abc_option : btw_map_solutions[between - 1][get<0>(set_3d)]) {
+            for (auto abc_option : btw_int_solutions_3d[between - 1][get<0>(set_3d)]) {
                for (int i = 0; i < 4; i++) {
                   bool good = true;
-                  good &= (btw_map_solutions[between - 1][get<1>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][0]) != btw_map_solutions[between - 1][get<0>(set_3d)].end());
-                  good &= (btw_map_solutions[between - 1][get<2>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][1]) != btw_map_solutions[between - 1][get<0>(set_3d)].end());
-                  good &= (btw_map_solutions[between - 1][get<3>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][2]) != btw_map_solutions[between - 1][get<0>(set_3d)].end());
+                  good &= (btw_int_solutions_3d[between - 1][get<1>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][0]) != btw_int_solutions_3d[between - 1][get<0>(set_3d)].end());
+                  good &= (btw_int_solutions_3d[between - 1][get<2>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][1]) != btw_int_solutions_3d[between - 1][get<0>(set_3d)].end());
+                  good &= (btw_int_solutions_3d[between - 1][get<3>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][2]) != btw_int_solutions_3d[between - 1][get<0>(set_3d)].end());
                   //good &= combine_3d_to_4d[abc_option.first][i][3] == test_groups[between]; //
                   if (good) {
                      next_4d_key = get_next_key_4d(kv.first, combine_3d_to_4d[abc_option.first][i][3], between);
-                     btw_map_4d_3d[between][next_4d_key].insert(make_tuple(btw_map_solutions[between - 1][get<0>(set_3d)][abc_option.first],
-                                                                           btw_map_solutions[between - 1][get<1>(set_3d)][combine_3d_to_4d[abc_option.first][i][0]],
-                                                                           btw_map_solutions[between - 1][get<2>(set_3d)][combine_3d_to_4d[abc_option.first][i][1]],
-                                                                           btw_map_solutions[between - 1][get<3>(set_3d)][combine_3d_to_4d[abc_option.first][i][2]]));
+                     btw_map_4d_3d[between][next_4d_key].insert(make_tuple(btw_int_solutions_3d[between - 1][get<0>(set_3d)][abc_option.first],
+                                                                           btw_int_solutions_3d[between - 1][get<1>(set_3d)][combine_3d_to_4d[abc_option.first][i][0]],
+                                                                           btw_int_solutions_3d[between - 1][get<2>(set_3d)][combine_3d_to_4d[abc_option.first][i][1]],
+                                                                           btw_int_solutions_3d[between - 1][get<3>(set_3d)][combine_3d_to_4d[abc_option.first][i][2]]));
                      btw_map_4d[between][next_4d_key].push_back(make_tuple(kv.first, combine_3d_to_4d[abc_option.first][i][3]));
                   }
                }
@@ -1171,8 +1219,9 @@ void print_answers_4d(bool only_count) {
 
 
 int main() {
+   initialize_stuff();
    #ifdef THREE_D
-      initialize_stuff();
+   #ifndef FOUR_D
       path_maker_3d();
       print_path_3d();
       path_finder_3d();
@@ -1180,9 +1229,12 @@ int main() {
       print_answers_3d(true); // true for just number of solutions
       make_answer_tree_3d();
       print_answer_tree_3d(true); // true for just search width
-      write_answer_tree_3d();
+      //write_answer_tree_3d();
+   #endif
    #endif
    #ifdef FOUR_D
+      read_answer_tree_3d();
+      //print_answer_tree_3d_4d(false); // true for just search width
       path_finder_4d();
       print_path_search_4d(true); // true for just number of solutions
       make_answer_tree_4d();
