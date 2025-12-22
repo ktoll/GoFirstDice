@@ -1234,6 +1234,24 @@ void print_answers_4d(bool only_count) {
    }
    cout << "Total 4d" << N << " solutions: " << count << "\n";
 }
+
+// write answer tree
+// (doesn't write joining)
+void write_answer_tree_4d() {
+   ofstream output_file("4d" + std::to_string(N) + "_answer_tree.txt");
+   for (int between = 0; between < HALF_COLS - 1; between++) {
+      output_file << "c" << between << "\n";
+      for (auto kv : btw_map_solutions_4d[between]) {
+         output_file << "b" << kv.first << "-";
+         for (auto kg : kv.second) {
+            output_file << kg.first << ":";
+            output_file << kg.second << ",";
+         }
+         output_file << "\n";
+      }
+   }
+   output_file.close();
+}
 #endif
 
 
@@ -1259,5 +1277,6 @@ int main() {
       make_answer_tree_4d();
       print_answer_tree_4d(true); // true for just search width
       print_answers_4d(true); // true for just number of solutions
+      write_answer_tree_4d();
    #endif
 }
