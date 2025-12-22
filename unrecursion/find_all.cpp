@@ -10,7 +10,7 @@
 #include <sstream>
 
 // Options: SEARCH_3d6, SEARCH_3d12, SEARCH_3d18, SEARCH_3d24, SEARCH_4d6, SEARCH_4d12, SEARCH_4d18
-#define SEARCH_4d18
+#define SEARCH_4d12
 
 using namespace std;
 
@@ -187,11 +187,14 @@ int sum_things(int thing) {
 }
 
 void initialize_stuff() {
+   #ifdef THREE_D
    for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 6; j++) {
          translator[i][j] = translator_unbackwards[i][backwards[j]];
       }
    }
+   #endif
+   #ifdef FOUR_D
    for (int i = 0; i < 24; i++) {
       for (int j = 0; j < 36; j++) {
          translator_4d_backwards[i][j] = translator_4d[i][backwards_4d[j]];
@@ -213,6 +216,7 @@ void initialize_stuff() {
       permtype_to_addition_4d[m][8] = 0;
       permtype_to_addition_4d[m][9] = 1;
    }
+   #endif
 }
 
 
@@ -535,7 +539,7 @@ void write_answer_tree_3d() {
 #ifdef FOUR_D
 // between tuple struct map queue stuff
 typedef tuple<int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int> btw_4d_key_t; // 24 4 letter perms, 12 2 letter perms
-typedef deque<tuple<btw_4d_key_t, int>> btw_4d_data_t;
+typedef deque<tuple<int, int>> btw_4d_data_t; // tuple(key, group)
 
 // abcd abdc acbd acdb adbc adcb
 // bacd badc bcad bcda bdac bdca
@@ -589,13 +593,20 @@ struct key_equal_4d : public binary_function<btw_4d_key_t, btw_4d_key_t, size_t>
    }
 };
 
-typedef unordered_map<const btw_4d_key_t, btw_4d_data_t, key_hash_4d, key_equal_4d> btw_4d_map_t;
-typedef unordered_map<const btw_4d_key_t, set<tuple<int, int, int, int>>, key_hash_4d, key_equal_4d> btw_4d_to_btw_3d_t;
-typedef unordered_map<const btw_4d_key_t, unordered_map<int, btw_4d_key_t>, key_hash_4d, key_equal_4d> btw_4d_map_sols_t;
+typedef unordered_map<const btw_4d_key_t, int, key_hash_4d, key_equal_4d> key_int_map_4d_t;
+typedef unordered_map<int, btw_4d_key_t> int_key_map_4d_t;
+
+typedef unordered_map<int, btw_4d_data_t> btw_4d_map_t;
+typedef unordered_map<int, set<tuple<int, int, int, int>>> btw_4d_to_btw_3d_t;
+typedef unordered_map<int, unordered_map<int, int>> btw_4d_map_sols_t; // var[key][group] = key
 typedef unordered_map<int, unordered_map<int, int>> btw_3d_int_sols_t; // var[key][group] = key
 
 
 // global variables
+key_int_map_4d_t key_int_map_4d[HALF_COLS];
+int_key_map_4d_t int_key_map_4d[HALF_COLS];
+int key_lengths_4d[HALF_COLS] = {0};
+
 btw_4d_map_t btw_map_4d[HALF_COLS];
 btw_4d_to_btw_3d_t btw_map_4d_3d[HALF_COLS];
 btw_4d_map_t joining_4d;
@@ -650,6 +661,15 @@ void print_answer_tree_3d_4d(bool only_count) {
 }
 
 // path searching
+int get_int_key_4d(btw_4d_key_t key, int between) {
+   if (key_int_map_4d[between].find(key) == key_int_map_4d[between].end()) {
+      key_int_map_4d[between][key] = key_lengths_4d[between];
+      int_key_map_4d[between][key_lengths_4d[between]] = key;
+      key_lengths_4d[between]++;
+   }
+   return key_int_map_4d[between][key];
+}
+
 btw_4d_key_t get_next_key_4d(btw_4d_key_t prev_4d_key, int group, int column) {
    // group = 0, index is perm
    int perm_to_permtype[36] = {7, 5, 3, 5, 3, 1, 6, 4, 3, 5, 3, 1, 6, 4, 2, 4, 3, 1, 6, 4, 2, 4, 2, 0, 9, 9, 9, 8, 9, 9, 8, 8, 9, 8, 8, 8};
@@ -783,17 +803,10 @@ void path_finder_4d() {
                               {18, 19,  9, 15}, // da
                               {20, 21,  3, 13}, // db
                               {22, 23,  1,  7}};// dc
-   // abcd dcba cbad dabc dbca acbd           dbac cabd cbad dabc abdc cdba
-   //         abdc cdba cbad dabc dbac cabd 
-   // abcd dcba dbac cabd cbad dabc // backwards
-   //int test_groups[6]  = {0, 23, 14, 18, 21, 2}; //
-   //int test_groups[6] = {0, 23, 20, 12, 14, 18}; //
-   // abcd dcba cbad dabc dbca acbd       dbca acbd cbad dabc abcd dcba
-   // abcd dcba cbad dabc dbca acbd
-   //int test_groups[12] = {0, 23, 14, 18, 21, 2, 21, 2, 14, 18, 0, 23}; //
    btw_4d_key_t next_4d_key = get_next_key_4d(make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0, 0);
-   btw_map_4d_3d[0][next_4d_key].insert(make_tuple(0, 0, 0, 0));
-   btw_map_4d[0][next_4d_key].push_back(make_tuple(make_tuple(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0));
+   int next_int_key = get_int_key_4d(next_4d_key, 0);
+   btw_map_4d_3d[0][next_int_key].insert(make_tuple(0, 0, 0, 0));
+   btw_map_4d[0][next_int_key].push_back(make_tuple(0, 0));
    for (int between = 1; between < HALF_COLS; between++) {
       for (auto kv : btw_map_4d[between - 1]) {
          for (auto set_3d : btw_map_4d_3d[between - 1][kv.first]) {
@@ -803,14 +816,14 @@ void path_finder_4d() {
                   good &= (btw_int_solutions_3d[between - 1][get<1>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][0]) != btw_int_solutions_3d[between - 1][get<0>(set_3d)].end());
                   good &= (btw_int_solutions_3d[between - 1][get<2>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][1]) != btw_int_solutions_3d[between - 1][get<0>(set_3d)].end());
                   good &= (btw_int_solutions_3d[between - 1][get<3>(set_3d)].find(combine_3d_to_4d[abc_option.first][i][2]) != btw_int_solutions_3d[between - 1][get<0>(set_3d)].end());
-                  //good &= combine_3d_to_4d[abc_option.first][i][3] == test_groups[between]; //
                   if (good) {
-                     next_4d_key = get_next_key_4d(kv.first, combine_3d_to_4d[abc_option.first][i][3], between);
-                     btw_map_4d_3d[between][next_4d_key].insert(make_tuple(btw_int_solutions_3d[between - 1][get<0>(set_3d)][abc_option.first],
-                                                                           btw_int_solutions_3d[between - 1][get<1>(set_3d)][combine_3d_to_4d[abc_option.first][i][0]],
-                                                                           btw_int_solutions_3d[between - 1][get<2>(set_3d)][combine_3d_to_4d[abc_option.first][i][1]],
-                                                                           btw_int_solutions_3d[between - 1][get<3>(set_3d)][combine_3d_to_4d[abc_option.first][i][2]]));
-                     btw_map_4d[between][next_4d_key].push_back(make_tuple(kv.first, combine_3d_to_4d[abc_option.first][i][3]));
+                     next_4d_key = get_next_key_4d(int_key_map_4d[between - 1][kv.first], combine_3d_to_4d[abc_option.first][i][3], between);
+                     next_int_key = get_int_key_4d(next_4d_key, between);
+                     btw_map_4d_3d[between][next_int_key].insert(make_tuple(btw_int_solutions_3d[between - 1][get<0>(set_3d)][abc_option.first],
+                                                                            btw_int_solutions_3d[between - 1][get<1>(set_3d)][combine_3d_to_4d[abc_option.first][i][0]],
+                                                                            btw_int_solutions_3d[between - 1][get<2>(set_3d)][combine_3d_to_4d[abc_option.first][i][1]],
+                                                                            btw_int_solutions_3d[between - 1][get<3>(set_3d)][combine_3d_to_4d[abc_option.first][i][2]]));
+                     btw_map_4d[between][next_int_key].push_back(make_tuple(kv.first, combine_3d_to_4d[abc_option.first][i][3]));
                   }
                }
             }
@@ -822,42 +835,43 @@ void path_finder_4d() {
    int current_flipped[36];
    for (auto kv : btw_map_4d[HALF_COLS - 1]) {
       // ^should be able to parallelize this for loop
-      current[ 0] = get< 0>(kv.first);
-      current[ 1] = get< 1>(kv.first);
-      current[ 2] = get< 2>(kv.first);
-      current[ 3] = get< 3>(kv.first);
-      current[ 4] = get< 4>(kv.first);
-      current[ 5] = get< 5>(kv.first);
-      current[ 6] = get< 6>(kv.first);
-      current[ 7] = get< 7>(kv.first);
-      current[ 8] = get< 8>(kv.first);
-      current[ 9] = get< 9>(kv.first);
-      current[10] = get<10>(kv.first);
-      current[11] = get<11>(kv.first);
-      current[12] = get<12>(kv.first);
-      current[13] = get<13>(kv.first);
-      current[14] = get<14>(kv.first);
-      current[15] = get<15>(kv.first);
-      current[16] = get<16>(kv.first);
-      current[17] = get<17>(kv.first);
-      current[18] = get<18>(kv.first);
-      current[19] = get<19>(kv.first);
-      current[20] = get<20>(kv.first);
-      current[21] = get<21>(kv.first);
-      current[22] = get<22>(kv.first);
-      current[23] = get<23>(kv.first);
-      current[24] = get<24>(kv.first);
-      current[25] = get<25>(kv.first);
-      current[26] = get<26>(kv.first);
-      current[27] = get<27>(kv.first);
-      current[28] = get<28>(kv.first);
-      current[29] = get<29>(kv.first);
-      current[30] = get<30>(kv.first);
-      current[31] = get<31>(kv.first);
-      current[32] = get<32>(kv.first);
-      current[33] = get<33>(kv.first);
-      current[34] = get<34>(kv.first);
-      current[35] = get<35>(kv.first);
+      btw_4d_key_t kv_first = int_key_map_4d[HALF_COLS - 1][kv.first];
+      current[ 0] = get< 0>(kv_first);
+      current[ 1] = get< 1>(kv_first);
+      current[ 2] = get< 2>(kv_first);
+      current[ 3] = get< 3>(kv_first);
+      current[ 4] = get< 4>(kv_first);
+      current[ 5] = get< 5>(kv_first);
+      current[ 6] = get< 6>(kv_first);
+      current[ 7] = get< 7>(kv_first);
+      current[ 8] = get< 8>(kv_first);
+      current[ 9] = get< 9>(kv_first);
+      current[10] = get<10>(kv_first);
+      current[11] = get<11>(kv_first);
+      current[12] = get<12>(kv_first);
+      current[13] = get<13>(kv_first);
+      current[14] = get<14>(kv_first);
+      current[15] = get<15>(kv_first);
+      current[16] = get<16>(kv_first);
+      current[17] = get<17>(kv_first);
+      current[18] = get<18>(kv_first);
+      current[19] = get<19>(kv_first);
+      current[20] = get<20>(kv_first);
+      current[21] = get<21>(kv_first);
+      current[22] = get<22>(kv_first);
+      current[23] = get<23>(kv_first);
+      current[24] = get<24>(kv_first);
+      current[25] = get<25>(kv_first);
+      current[26] = get<26>(kv_first);
+      current[27] = get<27>(kv_first);
+      current[28] = get<28>(kv_first);
+      current[29] = get<29>(kv_first);
+      current[30] = get<30>(kv_first);
+      current[31] = get<31>(kv_first);
+      current[32] = get<32>(kv_first);
+      current[33] = get<33>(kv_first);
+      current[34] = get<34>(kv_first);
+      current[35] = get<35>(kv_first);
       for (int i = 0; i < 24; i++) {
          current[i] += current[abcd_to_ab_cd[i][0]] * (MAX_SHARE_4d_2d - current[abcd_to_ab_cd[i][1]]);
       }
@@ -922,8 +936,8 @@ void path_finder_4d() {
                                                   current_flipped[translator_4d_backwards[translation][33]],
                                                   current_flipped[translator_4d_backwards[translation][34]],
                                                   current_flipped[translator_4d_backwards[translation][35]]);
-         if (btw_map_4d[HALF_COLS - 1].find(translated_key) != btw_map_4d[HALF_COLS - 1].end()) {
-            joining_4d[kv.first].push_back(make_tuple(translated_key, translation));
+         if (key_int_map_4d[HALF_COLS - 1].find(translated_key) != key_int_map_4d[HALF_COLS - 1].end()) {
+            joining_4d[kv.first].push_back(make_tuple(key_int_map_4d[HALF_COLS - 1][translated_key], translation));
          }
       }
    }
@@ -941,120 +955,123 @@ void print_path_search_4d(bool only_count) {
    if (!only_count) {
       for (int between = 0; between < HALF_COLS; between++) {
          for (auto kv : btw_map_4d[between]) {
-            cout << "((" << get< 0>(kv.first);
-            cout <<  "," << get< 1>(kv.first);
-            cout <<  "," << get< 2>(kv.first);
-            cout <<  "," << get< 3>(kv.first);
-            cout <<  "," << get< 4>(kv.first);
-            cout <<  "," << get< 5>(kv.first);
-            cout <<  "," << get< 6>(kv.first);
-            cout <<  "," << get< 7>(kv.first);
-            cout <<  "," << get< 8>(kv.first);
-            cout <<  "," << get< 9>(kv.first);
-            cout <<  "," << get<10>(kv.first);
-            cout <<  "," << get<11>(kv.first);
-            cout <<  "," << get<12>(kv.first);
-            cout <<  "," << get<13>(kv.first);
-            cout <<  "," << get<14>(kv.first);
-            cout <<  "," << get<15>(kv.first);
-            cout <<  "," << get<16>(kv.first);
-            cout <<  "," << get<17>(kv.first);
-            cout <<  "," << get<18>(kv.first);
-            cout <<  "," << get<19>(kv.first);
-            cout <<  "," << get<20>(kv.first);
-            cout <<  "," << get<21>(kv.first);
-            cout <<  "," << get<22>(kv.first);
-            cout <<  "," << get<23>(kv.first);
-            cout << ")(" << get<24>(kv.first);
-            cout <<  "," << get<25>(kv.first);
-            cout <<  "," << get<26>(kv.first);
-            cout <<  "," << get<27>(kv.first);
-            cout <<  "," << get<28>(kv.first);
-            cout <<  "," << get<29>(kv.first);
-            cout <<  "," << get<30>(kv.first);
-            cout <<  "," << get<31>(kv.first);
-            cout <<  "," << get<32>(kv.first);
-            cout <<  "," << get<33>(kv.first);
-            cout <<  "," << get<34>(kv.first);
-            cout <<  "," << get<35>(kv.first) << "))";
+            btw_4d_key_t kv_first = int_key_map_4d[between][kv.first];
+            cout << "((" << get< 0>(kv_first);
+            cout <<  "," << get< 1>(kv_first);
+            cout <<  "," << get< 2>(kv_first);
+            cout <<  "," << get< 3>(kv_first);
+            cout <<  "," << get< 4>(kv_first);
+            cout <<  "," << get< 5>(kv_first);
+            cout <<  "," << get< 6>(kv_first);
+            cout <<  "," << get< 7>(kv_first);
+            cout <<  "," << get< 8>(kv_first);
+            cout <<  "," << get< 9>(kv_first);
+            cout <<  "," << get<10>(kv_first);
+            cout <<  "," << get<11>(kv_first);
+            cout <<  "," << get<12>(kv_first);
+            cout <<  "," << get<13>(kv_first);
+            cout <<  "," << get<14>(kv_first);
+            cout <<  "," << get<15>(kv_first);
+            cout <<  "," << get<16>(kv_first);
+            cout <<  "," << get<17>(kv_first);
+            cout <<  "," << get<18>(kv_first);
+            cout <<  "," << get<19>(kv_first);
+            cout <<  "," << get<20>(kv_first);
+            cout <<  "," << get<21>(kv_first);
+            cout <<  "," << get<22>(kv_first);
+            cout <<  "," << get<23>(kv_first);
+            cout << ")(" << get<24>(kv_first);
+            cout <<  "," << get<25>(kv_first);
+            cout <<  "," << get<26>(kv_first);
+            cout <<  "," << get<27>(kv_first);
+            cout <<  "," << get<28>(kv_first);
+            cout <<  "," << get<29>(kv_first);
+            cout <<  "," << get<30>(kv_first);
+            cout <<  "," << get<31>(kv_first);
+            cout <<  "," << get<32>(kv_first);
+            cout <<  "," << get<33>(kv_first);
+            cout <<  "," << get<34>(kv_first);
+            cout <<  "," << get<35>(kv_first) << "))";
          }
          cout << "\n\n";
       }
       for (auto kv : joining_4d) {
-         cout << "((" << get< 0>(kv.first);
-         cout <<  "," << get< 1>(kv.first);
-         cout <<  "," << get< 2>(kv.first);
-         cout <<  "," << get< 3>(kv.first);
-         cout <<  "," << get< 4>(kv.first);
-         cout <<  "," << get< 5>(kv.first);
-         cout <<  "," << get< 6>(kv.first);
-         cout <<  "," << get< 7>(kv.first);
-         cout <<  "," << get< 8>(kv.first);
-         cout <<  "," << get< 9>(kv.first);
-         cout <<  "," << get<10>(kv.first);
-         cout <<  "," << get<11>(kv.first);
-         cout <<  "," << get<12>(kv.first);
-         cout <<  "," << get<13>(kv.first);
-         cout <<  "," << get<14>(kv.first);
-         cout <<  "," << get<15>(kv.first);
-         cout <<  "," << get<16>(kv.first);
-         cout <<  "," << get<17>(kv.first);
-         cout <<  "," << get<18>(kv.first);
-         cout <<  "," << get<19>(kv.first);
-         cout <<  "," << get<20>(kv.first);
-         cout <<  "," << get<21>(kv.first);
-         cout <<  "," << get<22>(kv.first);
-         cout <<  "," << get<23>(kv.first);
-         cout << ")(" << get<24>(kv.first);
-         cout <<  "," << get<25>(kv.first);
-         cout <<  "," << get<26>(kv.first);
-         cout <<  "," << get<27>(kv.first);
-         cout <<  "," << get<28>(kv.first);
-         cout <<  "," << get<29>(kv.first);
-         cout <<  "," << get<30>(kv.first);
-         cout <<  "," << get<31>(kv.first);
-         cout <<  "," << get<32>(kv.first);
-         cout <<  "," << get<33>(kv.first);
-         cout <<  "," << get<34>(kv.first);
-         cout <<  "," << get<35>(kv.first) << "))\n";
+         btw_4d_key_t kv_first = int_key_map_4d[HALF_COLS - 1][kv.first];
+         cout << "((" << get< 0>(kv_first);
+         cout <<  "," << get< 1>(kv_first);
+         cout <<  "," << get< 2>(kv_first);
+         cout <<  "," << get< 3>(kv_first);
+         cout <<  "," << get< 4>(kv_first);
+         cout <<  "," << get< 5>(kv_first);
+         cout <<  "," << get< 6>(kv_first);
+         cout <<  "," << get< 7>(kv_first);
+         cout <<  "," << get< 8>(kv_first);
+         cout <<  "," << get< 9>(kv_first);
+         cout <<  "," << get<10>(kv_first);
+         cout <<  "," << get<11>(kv_first);
+         cout <<  "," << get<12>(kv_first);
+         cout <<  "," << get<13>(kv_first);
+         cout <<  "," << get<14>(kv_first);
+         cout <<  "," << get<15>(kv_first);
+         cout <<  "," << get<16>(kv_first);
+         cout <<  "," << get<17>(kv_first);
+         cout <<  "," << get<18>(kv_first);
+         cout <<  "," << get<19>(kv_first);
+         cout <<  "," << get<20>(kv_first);
+         cout <<  "," << get<21>(kv_first);
+         cout <<  "," << get<22>(kv_first);
+         cout <<  "," << get<23>(kv_first);
+         cout << ")(" << get<24>(kv_first);
+         cout <<  "," << get<25>(kv_first);
+         cout <<  "," << get<26>(kv_first);
+         cout <<  "," << get<27>(kv_first);
+         cout <<  "," << get<28>(kv_first);
+         cout <<  "," << get<29>(kv_first);
+         cout <<  "," << get<30>(kv_first);
+         cout <<  "," << get<31>(kv_first);
+         cout <<  "," << get<32>(kv_first);
+         cout <<  "," << get<33>(kv_first);
+         cout <<  "," << get<34>(kv_first);
+         cout <<  "," << get<35>(kv_first) << "))\n";
          for (auto kg : kv.second) {
+            btw_4d_key_t kg_first = int_key_map_4d[HALF_COLS - 1][get<0>(kg)];
             cout << " " << get<1>(kg);
-            cout << " ((" << get< 0>(get<0>(kg));
-            cout <<   "," << get< 1>(get<0>(kg));
-            cout <<   "," << get< 2>(get<0>(kg));
-            cout <<   "," << get< 3>(get<0>(kg));
-            cout <<   "," << get< 4>(get<0>(kg));
-            cout <<   "," << get< 5>(get<0>(kg));
-            cout <<   "," << get< 6>(get<0>(kg));
-            cout <<   "," << get< 7>(get<0>(kg));
-            cout <<   "," << get< 8>(get<0>(kg));
-            cout <<   "," << get< 9>(get<0>(kg));
-            cout <<   "," << get<10>(get<0>(kg));
-            cout <<   "," << get<11>(get<0>(kg));
-            cout <<   "," << get<12>(get<0>(kg));
-            cout <<   "," << get<13>(get<0>(kg));
-            cout <<   "," << get<14>(get<0>(kg));
-            cout <<   "," << get<15>(get<0>(kg));
-            cout <<   "," << get<16>(get<0>(kg));
-            cout <<   "," << get<17>(get<0>(kg));
-            cout <<   "," << get<18>(get<0>(kg));
-            cout <<   "," << get<19>(get<0>(kg));
-            cout <<   "," << get<20>(get<0>(kg));
-            cout <<   "," << get<21>(get<0>(kg));
-            cout <<   "," << get<22>(get<0>(kg));
-            cout <<   "," << get<23>(get<0>(kg));
-            cout <<  ")(" << get<24>(get<0>(kg));
-            cout <<   "," << get<25>(get<0>(kg));
-            cout <<   "," << get<26>(get<0>(kg));
-            cout <<   "," << get<27>(get<0>(kg));
-            cout <<   "," << get<28>(get<0>(kg));
-            cout <<   "," << get<29>(get<0>(kg));
-            cout <<   "," << get<30>(get<0>(kg));
-            cout <<   "," << get<31>(get<0>(kg));
-            cout <<   "," << get<32>(get<0>(kg));
-            cout <<   "," << get<33>(get<0>(kg));
-            cout <<   "," << get<34>(get<0>(kg));
-            cout <<   "," << get<35>(get<0>(kg)) << "))\n";
+            cout << " ((" << get< 0>(kg_first);
+            cout <<   "," << get< 1>(kg_first);
+            cout <<   "," << get< 2>(kg_first);
+            cout <<   "," << get< 3>(kg_first);
+            cout <<   "," << get< 4>(kg_first);
+            cout <<   "," << get< 5>(kg_first);
+            cout <<   "," << get< 6>(kg_first);
+            cout <<   "," << get< 7>(kg_first);
+            cout <<   "," << get< 8>(kg_first);
+            cout <<   "," << get< 9>(kg_first);
+            cout <<   "," << get<10>(kg_first);
+            cout <<   "," << get<11>(kg_first);
+            cout <<   "," << get<12>(kg_first);
+            cout <<   "," << get<13>(kg_first);
+            cout <<   "," << get<14>(kg_first);
+            cout <<   "," << get<15>(kg_first);
+            cout <<   "," << get<16>(kg_first);
+            cout <<   "," << get<17>(kg_first);
+            cout <<   "," << get<18>(kg_first);
+            cout <<   "," << get<19>(kg_first);
+            cout <<   "," << get<20>(kg_first);
+            cout <<   "," << get<21>(kg_first);
+            cout <<   "," << get<22>(kg_first);
+            cout <<   "," << get<23>(kg_first);
+            cout <<  ")(" << get<24>(kg_first);
+            cout <<   "," << get<25>(kg_first);
+            cout <<   "," << get<26>(kg_first);
+            cout <<   "," << get<27>(kg_first);
+            cout <<   "," << get<28>(kg_first);
+            cout <<   "," << get<29>(kg_first);
+            cout <<   "," << get<30>(kg_first);
+            cout <<   "," << get<31>(kg_first);
+            cout <<   "," << get<32>(kg_first);
+            cout <<   "," << get<33>(kg_first);
+            cout <<   "," << get<34>(kg_first);
+            cout <<   "," << get<35>(kg_first) << "))\n";
          }
       }
       cout << "\n";
@@ -1090,82 +1107,84 @@ void print_answer_tree_4d(bool only_count) {
    if (!only_count) {
       for (int between = 0; between < HALF_COLS - 1; between++) {
          for (auto kv : btw_map_solutions_4d[between]) {
-            cout << "((" << get< 0>(kv.first);
-            cout <<  "," << get< 1>(kv.first);
-            cout <<  "," << get< 2>(kv.first);
-            cout <<  "," << get< 3>(kv.first);
-            cout <<  "," << get< 4>(kv.first);
-            cout <<  "," << get< 5>(kv.first);
-            cout <<  "," << get< 6>(kv.first);
-            cout <<  "," << get< 7>(kv.first);
-            cout <<  "," << get< 8>(kv.first);
-            cout <<  "," << get< 9>(kv.first);
-            cout <<  "," << get<10>(kv.first);
-            cout <<  "," << get<11>(kv.first);
-            cout <<  "," << get<12>(kv.first);
-            cout <<  "," << get<13>(kv.first);
-            cout <<  "," << get<14>(kv.first);
-            cout <<  "," << get<15>(kv.first);
-            cout <<  "," << get<16>(kv.first);
-            cout <<  "," << get<17>(kv.first);
-            cout <<  "," << get<18>(kv.first);
-            cout <<  "," << get<19>(kv.first);
-            cout <<  "," << get<20>(kv.first);
-            cout <<  "," << get<21>(kv.first);
-            cout <<  "," << get<22>(kv.first);
-            cout <<  "," << get<23>(kv.first);
-            cout << ")(" << get<24>(kv.first);
-            cout <<  "," << get<25>(kv.first);
-            cout <<  "," << get<26>(kv.first);
-            cout <<  "," << get<27>(kv.first);
-            cout <<  "," << get<28>(kv.first);
-            cout <<  "," << get<29>(kv.first);
-            cout <<  "," << get<30>(kv.first);
-            cout <<  "," << get<31>(kv.first);
-            cout <<  "," << get<32>(kv.first);
-            cout <<  "," << get<33>(kv.first);
-            cout <<  "," << get<34>(kv.first);
-            cout <<  "," << get<35>(kv.first) << ")) ";
+            btw_4d_key_t kv_first = int_key_map_4d[between][kv.first];
+            cout << "((" << get< 0>(kv_first);
+            cout <<  "," << get< 1>(kv_first);
+            cout <<  "," << get< 2>(kv_first);
+            cout <<  "," << get< 3>(kv_first);
+            cout <<  "," << get< 4>(kv_first);
+            cout <<  "," << get< 5>(kv_first);
+            cout <<  "," << get< 6>(kv_first);
+            cout <<  "," << get< 7>(kv_first);
+            cout <<  "," << get< 8>(kv_first);
+            cout <<  "," << get< 9>(kv_first);
+            cout <<  "," << get<10>(kv_first);
+            cout <<  "," << get<11>(kv_first);
+            cout <<  "," << get<12>(kv_first);
+            cout <<  "," << get<13>(kv_first);
+            cout <<  "," << get<14>(kv_first);
+            cout <<  "," << get<15>(kv_first);
+            cout <<  "," << get<16>(kv_first);
+            cout <<  "," << get<17>(kv_first);
+            cout <<  "," << get<18>(kv_first);
+            cout <<  "," << get<19>(kv_first);
+            cout <<  "," << get<20>(kv_first);
+            cout <<  "," << get<21>(kv_first);
+            cout <<  "," << get<22>(kv_first);
+            cout <<  "," << get<23>(kv_first);
+            cout << ")(" << get<24>(kv_first);
+            cout <<  "," << get<25>(kv_first);
+            cout <<  "," << get<26>(kv_first);
+            cout <<  "," << get<27>(kv_first);
+            cout <<  "," << get<28>(kv_first);
+            cout <<  "," << get<29>(kv_first);
+            cout <<  "," << get<30>(kv_first);
+            cout <<  "," << get<31>(kv_first);
+            cout <<  "," << get<32>(kv_first);
+            cout <<  "," << get<33>(kv_first);
+            cout <<  "," << get<34>(kv_first);
+            cout <<  "," << get<35>(kv_first) << ")) ";
          }
          cout << "\n\n";
       }
       for (auto kv : joining_4d) {
-         cout << "((" << get< 0>(kv.first);
-         cout <<  "," << get< 1>(kv.first);
-         cout <<  "," << get< 2>(kv.first);
-         cout <<  "," << get< 3>(kv.first);
-         cout <<  "," << get< 4>(kv.first);
-         cout <<  "," << get< 5>(kv.first);
-         cout <<  "," << get< 6>(kv.first);
-         cout <<  "," << get< 7>(kv.first);
-         cout <<  "," << get< 8>(kv.first);
-         cout <<  "," << get< 9>(kv.first);
-         cout <<  "," << get<10>(kv.first);
-         cout <<  "," << get<11>(kv.first);
-         cout <<  "," << get<12>(kv.first);
-         cout <<  "," << get<13>(kv.first);
-         cout <<  "," << get<14>(kv.first);
-         cout <<  "," << get<15>(kv.first);
-         cout <<  "," << get<16>(kv.first);
-         cout <<  "," << get<17>(kv.first);
-         cout <<  "," << get<18>(kv.first);
-         cout <<  "," << get<19>(kv.first);
-         cout <<  "," << get<20>(kv.first);
-         cout <<  "," << get<21>(kv.first);
-         cout <<  "," << get<22>(kv.first);
-         cout <<  "," << get<23>(kv.first);
-         cout << ")(" << get<24>(kv.first);
-         cout <<  "," << get<25>(kv.first);
-         cout <<  "," << get<26>(kv.first);
-         cout <<  "," << get<27>(kv.first);
-         cout <<  "," << get<28>(kv.first);
-         cout <<  "," << get<29>(kv.first);
-         cout <<  "," << get<30>(kv.first);
-         cout <<  "," << get<31>(kv.first);
-         cout <<  "," << get<32>(kv.first);
-         cout <<  "," << get<33>(kv.first);
-         cout <<  "," << get<34>(kv.first);
-         cout <<  "," << get<35>(kv.first) << "))  ";
+         btw_4d_key_t kv_first = int_key_map_4d[HALF_COLS - 1][kv.first];
+         cout << "((" << get< 0>(kv_first);
+         cout <<  "," << get< 1>(kv_first);
+         cout <<  "," << get< 2>(kv_first);
+         cout <<  "," << get< 3>(kv_first);
+         cout <<  "," << get< 4>(kv_first);
+         cout <<  "," << get< 5>(kv_first);
+         cout <<  "," << get< 6>(kv_first);
+         cout <<  "," << get< 7>(kv_first);
+         cout <<  "," << get< 8>(kv_first);
+         cout <<  "," << get< 9>(kv_first);
+         cout <<  "," << get<10>(kv_first);
+         cout <<  "," << get<11>(kv_first);
+         cout <<  "," << get<12>(kv_first);
+         cout <<  "," << get<13>(kv_first);
+         cout <<  "," << get<14>(kv_first);
+         cout <<  "," << get<15>(kv_first);
+         cout <<  "," << get<16>(kv_first);
+         cout <<  "," << get<17>(kv_first);
+         cout <<  "," << get<18>(kv_first);
+         cout <<  "," << get<19>(kv_first);
+         cout <<  "," << get<20>(kv_first);
+         cout <<  "," << get<21>(kv_first);
+         cout <<  "," << get<22>(kv_first);
+         cout <<  "," << get<23>(kv_first);
+         cout << ")(" << get<24>(kv_first);
+         cout <<  "," << get<25>(kv_first);
+         cout <<  "," << get<26>(kv_first);
+         cout <<  "," << get<27>(kv_first);
+         cout <<  "," << get<28>(kv_first);
+         cout <<  "," << get<29>(kv_first);
+         cout <<  "," << get<30>(kv_first);
+         cout <<  "," << get<31>(kv_first);
+         cout <<  "," << get<32>(kv_first);
+         cout <<  "," << get<33>(kv_first);
+         cout <<  "," << get<34>(kv_first);
+         cout <<  "," << get<35>(kv_first) << "))  ";
       }
       cout << "\n\n";
    }
@@ -1173,7 +1192,7 @@ void print_answer_tree_4d(bool only_count) {
 
 
 // answer printing
-vector<string> recursive_print_answers_4d(int depth, btw_4d_key_t base, string so_far, int translation) {
+vector<string> recursive_print_answers_4d(int depth, int base, string so_far, int translation) {
    vector<string> solutions = {};
    if (depth == -1) {
       solutions.push_back(so_far);
@@ -1194,7 +1213,7 @@ vector<string> recursive_print_answers_4d(int depth, btw_4d_key_t base, string s
 }
 
 void print_answers_4d(bool only_count) {
-   btw_4d_key_t front_base;
+   int front_base;
    int groups[N];
    int count = 0;
    for (auto meeting : joining_4d) {
@@ -1234,7 +1253,7 @@ int main() {
    #endif
    #ifdef FOUR_D
       read_answer_tree_3d();
-      //print_answer_tree_3d_4d(false); // true for just search width
+      //print_answer_tree_3d_4d(true); // true for just search width
       path_finder_4d();
       print_path_search_4d(true); // true for just number of solutions
       make_answer_tree_4d();
